@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAZAIB AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .ai-bubble {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 🔥 3D Background */
+        body {
+            background: linear-gradient(135deg, #ff7eb3, #65d3ff, #ffe28a);
+            background-size: 400% 400%;
+            animation: bg3d 12s ease infinite;
+        }
+        @keyframes bg3d {
+            0% { background-position: 0% 50%; transform: perspective(800px) rotateX(2deg) rotateY(2deg); }
+            50% { background-position: 100% 50%; transform: perspective(800px) rotateX(-2deg) rotateY(-2deg); }
+            100% { background-position: 0% 50%; transform: perspective(800px) rotateX(2deg) rotateY(2deg); }
+        }
+
+        /* 🌍 Language Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #bbb;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px; width: 24px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #4caf50; }
+        input:checked + .slider:before { transform: translateX(30px); }
+    </style>
+</head>
+
+
+<!-- START JAVASCRIPT -->
+<script type="module">
+
+let selectedLanguage = "english"; // default
+
+
+/* ===========================================
+   🔥 AI RESPONSE GENERATION
+=========================================== */
+async function generateAIContent(prompt) {
+
+    const apiKey = "AIzaSyCvUx81QgNI7TkVT5nNQjYdySSLDXSGgX8";
+
+    const url = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey};
+
+    let fullPrompt = "";
+
+    if (selectedLanguage === "english") {
+        fullPrompt = Reply ONLY in English:\nUser Question: ${prompt};
+    } else {
+        fullPrompt = Reply ONLY in Roman Urdu:\nUser Question: ${prompt};
+    }
+
+    const payload = {
+        contents: [{ parts: [{ text: fullPrompt }] }]
+    };
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No AI response.";
+}
+
+
+
+/* ===========================================
+   🎤 VOICE INPUT 
+=========================================== */
+function startVoiceInput(target) {
+    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!Rec) return alert("Your browser does not support voice input!");
+
+    const rec = new Rec();
+
+    rec.lang = selectedLanguage === "english" ? "en-US" : "ur-PK";
+
+    rec.start();
+
+    rec.onresult = (e) => {
+        target.value = e.results[0][0].transcript;
+    };
+}
+
+
+
+/* ===========================================
+   🔊 VOICE OUTPUT 
+=========================================== */
+function speakText(text) {
+    const u = new SpeechSynthesisUtterance(text);
+
+    u.lang = selectedLanguage === "english" ? "en-US" : "ur-PK";
+    u.rate = 1;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+}
+
+
+
+/* ===========================================
+   🚀 LOAD UI INTERACTIONS
+=========================================== */
+window.onload = () => {
+
+    const toggle = document.getElementById("langToggle");
+    toggle.addEventListener("change", () => {
+        selectedLanguage = toggle.checked ? "urdu" : "english";
+    });
+
+    const promptInput = document.getElementById("promptInput");
+    const generateButton = document.getElementById("generateButton");
+    const responseContainer = document.getElementById("responseContainer");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const micButton = document.getElementById("micButton");
+    const speakButton = document.getElementById("speakButton");
+
+    let lastAIResponse = "";
+
+
+    micButton.onclick = () => startVoiceInput(promptInput);
+
+    speakButton.onclick = () => speakText(lastAIResponse);
+
+
+    generateButton.onclick = async () => {
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        loadingIndicator.classList.remove("hidden");
+        responseContainer.innerHTML = "";
+
+        const text = await generateAIContent(prompt);
+
+        responseContainer.innerHTML = `
+            <div class="ai-bubble bg-white p-5 rounded-2xl shadow-xl">
+                ${text.replace(/\n/g, "<br>")}
+            </div>
+        `;
+
+        lastAIResponse = text;
+        speakText(text);
+
+        loadingIndicator.classList.add("hidden");
+    };
+};
+
+</script>
+<!-- END JAVASCRIPT -->
+
+
+
+<body class="min-h-screen flex flex-col items-center p-6">
+
+    <div class="w-full max-w-3xl">
+
+        <!-- TITLE -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-800">JAZAIB AI</h1>
+            <h4>AI CREATOR MUHAMMAD TAQI</h4>
+        </div>
+
+
+        <!-- 🌍 LANGUAGE TOGGLE -->
+        <div class="flex justify-center mb-4 items-center gap-4">
+            <span class="font-bold text-gray-700">English</span>
+
+            <label class="switch">
+                <input type="checkbox" id="langToggle">
+                <span class="slider"></span>
+            </label>
+
+            <span class="font-bold text-gray-700">Urdu</span>
+        </div>
+
+
+        <!-- INPUT BOX -->
+        <div class="bg-white/70 backdrop-blur-md p-6 rounded-2xl shadow-xl border">
+
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Your Prompt
+            </label>
+
+            <textarea id="promptInput" rows="4"
+                class="w-full p-4 bg-gray-50 border rounded-xl"
+                placeholder="Ask the AI anything..."></textarea>
+
+
+            <!-- BUTTONS -->
+            <div class="flex gap-3 mt-4">
+
+                <button id="generateButton"
+                    class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md">
+                    ⚙ Generate
+                </button>
+
+                <button id="micButton"
+                    class="bg-gray-700 text-white px-4 rounded-xl shadow-md">
+                    🎤
+                </button>
+
+                <button id="speakButton"
+                    class="bg-green-600 text-white px-4 rounded-xl shadow-md">
+                    🔊
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+        <div id="loadingIndicator" class="hidden mt-6 text-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600 mx-auto"></div>
+            <p class="mt-2 text-gray-800">Thinking...</p>
+        </div>
+
+
+        <!-- AI RESPONSE -->
+        <div id="responseContainer" class="mt-8 space-y-4"></div>
+
+    </div>
+
+</body>
+</html>
