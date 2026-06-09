@@ -24,6 +24,7 @@
             position: relative;
         }
 
+        /* Animated Stars Background */
         #canvas {
             position: absolute;
             top: 0;
@@ -132,42 +133,16 @@
     </div>
 
     <div id="chatBox">
-        <div class="message ai-msg">System Online. Connecting to GitHub Node...</div>
+        <div class="message ai-msg">System Online. Search anything or talk to AI...</div>
     </div>
 
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Inquire knowledge...">
-        <button onclick="window.askAether ? askAether() : alert('System Booting, Please wait...')">SEND</button>
+        <button onclick="askAether()">SEND</button>
     </div>
 </div>
 
-<script>
-    // GitHub Raw Link jahan se README file ka text load hoga
-    const readmeRawUrl = "[https://raw.githubusercontent.com/muhammadtaqi512q-oss/JAZAIB-AI/main/README.md](https://raw.githubusercontent.com/muhammadtaqi512q-oss/JAZAIB-AI/main/README.md)";
-
-    async function loadRemoteLogic() {
-        const chatBox = document.getElementById('chatBox');
-        try {
-            const response = await fetch(readmeRawUrl);
-            if (!response.ok) throw new Error("Network response was not ok");
-            
-            const jsCode = await response.text();
-
-            // Dynamic script generate karke head mein inject karna
-            const script = document.createElement('script');
-            script.text = jsCode;
-            document.head.appendChild(script);
-
-            // UI update jab logic successfully load ho jaye
-            chatBox.innerHTML = '<div class="message ai-msg">System Online. Search anything or talk to AI...</div>';
-        } catch (error) {
-            console.error("Failed to load AI brain:", error);
-            chatBox.innerHTML = '<div class="message ai-msg" style="color: #ff4a4a;">Error: Failed to fetch AI Brain from core repo.</div>';
-        }
-    }
-
-    // Page load hote hi GitHub se script pull karein
-    window.addEventListener('DOMContentLoaded', loadRemoteLogic);
-</script>
 </body>
+          <script src="MT/API/DATA.js"></script>
+
 </html>
