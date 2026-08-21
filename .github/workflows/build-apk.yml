@@ -1,55 +1,52 @@
-name: Build Android APK with Mic Support
+name: Build Clean APK with Icon 
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Cordova, Plugins & Configure Permissions
+      - name: Install Cordova & Build APK with Icon
         run: |
           npm install -g cordova
-          cordova create vibeApp com.taqi.vibe Vibe
           
-          # HTML aur Icons Copy Karein
-          cp index.html vibeApp/www/
-          cp icon.png vibeApp/www/ || true
+          # 1. Create Cordova project with Lyramoon 
+          cordova create app com.vibe5.nexura "VIBE 4"
           
-          cd vibeApp
+          # 2. Copy Web Source
+          cp index.html app/www/
           
-          # Android Platform Add Karein
+          # 3. Add Custom Icon to Config if icon.png exists
+          if [ -f "icon.png" ]; then
+            cp icon.png app/www/icon.png
+            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
+          fi
+          
+          # 4. Add Android Platform & Build
+          cd app
           cordova platform add android
-          
-          # WebRTC aur Microphone Plugins Install Karein
-          cordova plugin add cordova-plugin-android-permissions
-          cordova plugin add cordova-plugin-media-capture
-          
-          # AndroidManifest.xml mein Permissions Force Add Karein
-          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />' platforms/android/app/src/main/AndroidManifest.xml
-          
-          # APK Build Karein
           cordova build android --debug
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: vibe-debug-apk
-          path: vibeApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          name: VIBE-APP-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
