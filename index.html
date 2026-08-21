@@ -1,2 +1,501 @@
-<h1>AETER AI</h1>
-<P>LINK https://muhammadtaqi512q-oss.github.io/JAZAIB-AI/MT/API/DATA/FETCH/ID/TM</P>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIBE - Created by Muhammad Taqi</title>
+    <!-- Favicon Icon -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }
+        body { background: #f0f2f5; color: #111b21; height: 100vh; display: flex; justify-content: center; align-items: center; }
+
+        .clickable-icon { cursor: pointer; transition: transform 0.2s; }
+        .clickable-icon:hover { transform: scale(1.05); }
+
+        /* Auth Screen */
+        .auth-container { width: 100%; max-width: 400px; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        .app-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; }
+        .auth-container h1 { color: #00a884; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+        .auth-container .subtitle { font-size: 13px; color: #667781; margin-bottom: 25px; font-weight: 600; }
+        .auth-input { width: 100%; padding: 12px 14px; margin-bottom: 15px; border: 1px solid #e9edef; border-radius: 8px; font-size: 14px; background: #f8f9fa; outline: none; }
+        .auth-input:focus { border-color: #00a884; background: #fff; }
+        .btn-primary { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+        .btn-primary:hover { background: #008f6f; }
+
+        /* Main App Layout */
+        .app-layout { width: 100vw; height: 100vh; display: flex; background: #fff; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 380px; border-right: 1px solid #e9edef; display: flex; flex-direction: column; background: #ffffff; }
+        .sidebar-header { height: 60px; background: #f0f2f5; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9edef; }
+        .user-brand { display: flex; align-items: center; gap: 10px; }
+        .header-logo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .profile-info { display: flex; flex-direction: column; }
+        .profile-name { font-weight: 700; font-size: 15px; color: #111b21; }
+        .profile-id { font-size: 11px; color: #667781; }
+        .header-actions { display: flex; gap: 18px; color: #54656f; font-size: 18px; cursor: pointer; }
+        .header-actions i:hover { color: #00a884; }
+
+        .search-box { padding: 8px 12px; background: #ffffff; border-bottom: 1px solid #e9edef; }
+        .search-input { width: 100%; padding: 8px 12px 8px 35px; border-radius: 8px; border: none; background: #f0f2f5; font-size: 13px; outline: none; }
+        .search-wrapper { position: relative; }
+        .search-wrapper i { position: absolute; left: 12px; top: 10px; color: #54656f; font-size: 12px; }
+
+        .contacts-list { flex: 1; overflow-y: auto; }
+        .contact-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f6f6; transition: background 0.2s; }
+        .contact-item:hover, .contact-item.active { background: #f0f2f5; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #00a884; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; margin-right: 12px; flex-shrink: 0; overflow: hidden; }
+        .contact-details { flex: 1; overflow: hidden; }
+        .contact-title { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #111b21; }
+        .last-msg { font-size: 12px; color: #667781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+        /* Right Chat Panel */
+        .main-chat { flex: 1; display: flex; flex-direction: column; background: #efeae2; position: relative; }
+        .chat-header { height: 60px; background: #f0f2f5; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9edef; }
+        .chat-header-user { display: flex; align-items: center; }
+        .chat-header-actions { display: flex; gap: 10px; }
+        .chat-action-btn { background: #ea4335; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .chat-action-btn.secondary { background: #54656f; }
+        .chat-action-btn:hover { opacity: 0.9; }
+
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg-bubble { max-width: 65%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 19px; position: relative; word-wrap: break-word; box-shadow: 0 1px 0.5px rgba(11,20,26,0.13); }
+        .msg-bubble.me { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
+        .msg-bubble.them { background: #ffffff; align-self: flex-start; border-top-left-radius: 0; }
+        .msg-bubble img, .msg-bubble video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-bottom: 4px; display: block; }
+        .msg-bubble audio { width: 220px; margin-top: 4px; outline: none; }
+        .msg-time { font-size: 10px; color: #667781; text-align: right; margin-top: 2px; }
+
+        .chat-footer { height: 62px; background: #f0f2f5; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+        .message-input { flex: 1; padding: 11px 16px; border: none; border-radius: 8px; font-size: 14px; outline: none; background: #ffffff; }
+        .media-btn { color: #54656f; font-size: 20px; cursor: pointer; padding: 5px; }
+        .media-btn:hover { color: #00a884; }
+        .media-btn.recording { color: #ea4335; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        .send-btn { background: #00a884; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+        .empty-chat { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f2f5; color: #667781; text-align: center; }
+        .empty-chat img { width: 100px; height: 100px; margin-bottom: 15px; border-radius: 50%; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,20,26,0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #ffffff; width: 360px; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+        .modal-header { font-size: 18px; font-weight: 600; color: #111b21; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- Account Setup Screen -->
+    <div class="auth-container" id="authScreen">
+        <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
+            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
+        </a>
+        <h1>VIBE</h1>
+        <p class="subtitle">CREATED BY MUHAMMAD TAQI</p>
+        <input type="text" id="nameInput" class="auth-input" placeholder="Your Name" maxlength="20">
+        <input type="text" id="customIdInput" class="auth-input" placeholder="Enter 12-25 Digit Custom ID" maxlength="25">
+        <button class="btn-primary" onclick="createProfile()">Create & Save Account</button>
+    </div>
+
+    <!-- Main Messenger Interface -->
+    <div class="app-layout" id="appLayout" style="display: none;">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-brand">
+                    <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
+                        <img src="icon.png" class="header-logo clickable-icon" alt="VIBE Icon">
+                    </a>
+                    <div class="profile-info">
+                        <span class="profile-name" id="myProfileName">-</span>
+                        <span class="profile-id" id="myProfileId">ID: -</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <i class="fa-solid fa-user-plus" title="Add Contact" onclick="openModal()"></i>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search-input" placeholder="Search or start new chat">
+                </div>
+            </div>
+
+            <div class="contacts-list" id="contactsContainer"></div>
+        </div>
+
+        <!-- Right Chat Panel -->
+        <div class="main-chat">
+            <div id="emptyChatView" class="empty-chat">
+                <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
+                    <img src="icon.png" alt="VIBE Icon" class="clickable-icon">
+                </a>
+                <h2>VIBE Web</h2>
+                <p style="margin-top: 8px; font-size: 14px;">Select a contact or click '+' to add a friend using their ID.</p>
+            </div>
+
+            <div id="activeChatView" style="display: none; height: 100%; flex-direction: column;">
+                <div class="chat-header">
+                    <div class="chat-header-user">
+                        <div class="avatar" id="activeAvatar">?</div>
+                        <div>
+                            <div class="profile-name" id="activeContactName">Friend</div>
+                            <div class="profile-id" id="activeContactId">ID: -</div>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button class="chat-action-btn secondary" onclick="deleteChat()" title="Delete all messages with this contact">
+                            <i class="fa-solid fa-broom"></i> Clear Chat
+                        </button>
+                        <button class="chat-action-btn" onclick="deleteContact()" title="Delete contact permanently">
+                            <i class="fa-solid fa-trash"></i> Delete Contact
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages"></div>
+
+                <div class="chat-footer">
+                    <label for="fileInput" class="media-btn" title="Send Image or Video">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </label>
+                    <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
+                    
+                    <div class="media-btn" id="micBtn" onclick="toggleVoiceRecord()" title="Record Voice Message">
+                        <i class="fa-solid fa-microphone"></i>
+                    </div>
+
+                    <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Contact -->
+    <div class="modal" id="addContactModal">
+        <div class="modal-content">
+            <div class="modal-header">Add New Contact</div>
+            <input type="text" id="friendNameInput" class="auth-input" placeholder="Contact Name" maxlength="20">
+            <input type="text" id="friendIdInput" class="auth-input" placeholder="Enter 12-25 Digit ID" maxlength="25">
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-primary" style="background: #e9edef; color: #111b21;" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveContact()">Add & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let peer = null;
+        let connections = {};
+        let contacts = [];
+        let messagesDB = {};
+        let activeFriendId = null;
+
+        // Audio Recording Variables
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('vibe_user');
+            const savedContacts = localStorage.getItem('vibe_contacts');
+            const savedMessages = localStorage.getItem('vibe_messages');
+
+            if (savedContacts) contacts = JSON.parse(savedContacts);
+            if (savedMessages) messagesDB = JSON.parse(savedMessages);
+
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                initPeer();
+            }
+        };
+
+        function createProfile() {
+            const name = document.getElementById('nameInput').value.trim();
+            const customId = document.getElementById('customIdInput').value.trim();
+
+            if (!name) return alert('Please enter your name');
+            if (!/^[0-9]{12,25}$/.test(customId)) return alert('ID must be between 12 and 25 digits!');
+
+            currentUser = { name, id: customId };
+            localStorage.setItem('vibe_user', JSON.stringify(currentUser));
+            initPeer();
+        }
+
+        function initPeer() {
+            if (peer) peer.destroy();
+
+            peer = new Peer('vibe-' + currentUser.id);
+
+            peer.on('open', () => {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('appLayout').style.display = 'flex';
+                document.getElementById('myProfileName').innerText = currentUser.name;
+                document.getElementById('myProfileId').innerText = 'ID: ' + currentUser.id;
+                renderContacts();
+            });
+
+            peer.on('connection', (conn) => {
+                const incomingId = conn.peer.replace('vibe-', '');
+                connections[incomingId] = conn;
+
+                conn.on('data', (data) => {
+                    if (data.type === 'chat') {
+                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
+                        
+                        if (!contacts.some(c => c.id === data.fromId)) {
+                            contacts.push({ name: data.fromName, id: data.fromId });
+                            localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
+                            renderContacts();
+                        }
+
+                        if (activeFriendId === data.fromId) {
+                            renderMessages();
+                        }
+                    }
+                });
+            });
+
+            peer.on('error', (err) => console.error('PeerJS Error:', err));
+        }
+
+        function openModal() { document.getElementById('addContactModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('addContactModal').style.display = 'none'; }
+
+        function saveContact() {
+            const friendName = document.getElementById('friendNameInput').value.trim();
+            const friendId = document.getElementById('friendIdInput').value.trim();
+
+            if (!friendName) return alert('Enter contact name');
+            if (!/^[0-9]{12,25}$/.test(friendId)) return alert('Enter a valid 12-25 digit ID');
+            if (friendId === currentUser.id) return alert('You cannot add your own ID!');
+
+            if (!contacts.some(c => c.id === friendId)) {
+                contacts.push({ name: friendName, id: friendId });
+                localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
+                renderContacts();
+            }
+
+            closeModal();
+            selectContact(friendId);
+        }
+
+        function renderContacts() {
+            const container = document.getElementById('contactsContainer');
+            container.innerHTML = '';
+
+            contacts.forEach(c => {
+                const userMsgs = messagesDB[c.id] || [];
+                let lastMsg = 'Click to chat';
+                if (userMsgs.length > 0) {
+                    const last = userMsgs[userMsgs.length - 1];
+                    if (last.msgType === 'image') lastMsg = '📷 Photo';
+                    else if (last.msgType === 'video') lastMsg = '🎥 Video';
+                    else if (last.msgType === 'audio') lastMsg = '🎙️ Voice Message';
+                    else lastMsg = last.text;
+                }
+
+                const item = document.createElement('div');
+                item.className = `contact-item ${activeFriendId === c.id ? 'active' : ''}`;
+                item.onclick = () => selectContact(c.id);
+
+                item.innerHTML = `
+                    <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+                    <div class="contact-details">
+                        <div class="contact-title">
+                            <span>${c.name}</span>
+                        </div>
+                        <div class="last-msg">${lastMsg}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function selectContact(friendId) {
+            activeFriendId = friendId;
+            const contact = contacts.find(c => c.id === friendId);
+
+            document.getElementById('emptyChatView').style.display = 'none';
+            document.getElementById('activeChatView').style.display = 'flex';
+
+            document.getElementById('activeAvatar').innerText = contact ? contact.name.charAt(0).toUpperCase() : '?';
+            document.getElementById('activeContactName').innerText = contact ? contact.name : friendId;
+            document.getElementById('activeContactId').innerText = 'ID: ' + friendId;
+
+            if (!connections[friendId]) {
+                const conn = peer.connect('vibe-' + friendId, { reliable: true });
+                connections[friendId] = conn;
+
+                conn.on('data', (data) => {
+                    if (data.type === 'chat') {
+                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
+                        if (activeFriendId === data.fromId) renderMessages();
+                    }
+                });
+            }
+
+            renderContacts();
+            renderMessages();
+        }
+
+        function sendMessage(msgType = 'text', mediaUrl = null) {
+            const input = document.getElementById('messageInput');
+            const text = msgType === 'text' ? input.value.trim() : '';
+            if ((!text && !mediaUrl) || !activeFriendId) return;
+
+            const payload = {
+                type: 'chat',
+                fromName: currentUser.name,
+                fromId: currentUser.id,
+                text: text,
+                msgType: msgType,
+                mediaUrl: mediaUrl
+            };
+
+            const conn = connections[activeFriendId];
+
+            if (conn && conn.open) {
+                conn.send(payload);
+            } else {
+                const newConn = peer.connect('vibe-' + activeFriendId, { reliable: true });
+                connections[activeFriendId] = newConn;
+                newConn.on('open', () => {
+                    newConn.send(payload);
+                });
+            }
+
+            saveMessage(activeFriendId, currentUser.name, text, 'me', msgType, mediaUrl);
+            if (msgType === 'text') input.value = '';
+            renderMessages();
+            renderContacts();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64Data = event.target.result;
+                const isVideo = file.type.startsWith('video');
+                sendMessage(isVideo ? 'video' : 'image', base64Data);
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        async function toggleVoiceRecord() {
+            const micBtn = document.getElementById('micBtn');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            sendMessage('audio', event.target.result);
+                        };
+                        reader.readAsDataURL(audioBlob);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                    micBtn.innerHTML = '<i class="fa-solid fa-square"></i>';
+                } catch (err) {
+                    alert('Microphone access denied or not supported!');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+            }
+        }
+
+        function saveMessage(friendId, senderName, text, type, msgType = 'text', mediaUrl = null) {
+            if (!messagesDB[friendId]) messagesDB[friendId] = [];
+
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messagesDB[friendId].push({ text, type, time, msgType, mediaUrl });
+
+            localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+
+            const list = messagesDB[activeFriendId] || [];
+
+            list.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `msg-bubble ${msg.type}`;
+                
+                let contentHTML = '';
+                if (msg.msgType === 'image') {
+                    contentHTML += `<img src="${msg.mediaUrl}" alt="Sent Image">`;
+                } else if (msg.msgType === 'video') {
+                    contentHTML += `<video src="${msg.mediaUrl}" controls></video>`;
+                } else if (msg.msgType === 'audio') {
+                    contentHTML += `<audio src="${msg.mediaUrl}" controls></audio>`;
+                }
+
+                if (msg.text) contentHTML += `<div>${msg.text}</div>`;
+                contentHTML += `<div class="msg-time">${msg.time}</div>`;
+
+                div.innerHTML = contentHTML;
+                container.appendChild(div);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function deleteChat() {
+            if (!activeFriendId) return;
+            if (confirm("Delete all chat messages with this contact?")) {
+                delete messagesDB[activeFriendId];
+                localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
+                renderMessages();
+                renderContacts();
+            }
+        }
+
+        function deleteContact() {
+            if (!activeFriendId) return;
+            if (confirm("Permanently delete this contact?")) {
+                contacts = contacts.filter(c => c.id !== activeFriendId);
+                localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
+
+                delete messagesDB[activeFriendId];
+                localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
+
+                activeFriendId = null;
+                document.getElementById('activeChatView').style.display = 'none';
+                document.getElementById('emptyChatView').style.display = 'flex';
+
+                renderContacts();
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+    </script>
+</body>
+</html>
