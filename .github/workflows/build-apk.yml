@@ -29,7 +29,7 @@ jobs:
           npm install -g cordova
           
           # 1. Create Cordova project with Lyramoon 
-          cordova create app com.vibe5.nexura "VIBE 4"
+          cordova create app com.vibe7.nexura "VIBE PRO"
           
           # 2. Copy Web Source
           cp index.html app/www/
