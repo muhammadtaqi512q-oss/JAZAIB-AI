@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIBE - Created by Muhammad Taqi</title>
-    <!-- Favicon Icon -->
     <link rel="icon" type="image/png" href="icon.png">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -14,15 +13,24 @@
         .clickable-icon { cursor: pointer; transition: transform 0.2s; }
         .clickable-icon:hover { transform: scale(1.05); }
 
-        /* Auth Screen */
+        /* Auth Screens */
         .auth-container { width: 100%; max-width: 400px; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; }
+        .auth-screen { display: none; }
+        .auth-screen.active { display: block; }
         .app-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; }
         .auth-container h1 { color: #00a884; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
         .auth-container .subtitle { font-size: 13px; color: #667781; margin-bottom: 25px; font-weight: 600; }
         .auth-input { width: 100%; padding: 12px 14px; margin-bottom: 15px; border: 1px solid #e9edef; border-radius: 8px; font-size: 14px; background: #f8f9fa; outline: none; }
         .auth-input:focus { border-color: #00a884; background: #fff; }
-        .btn-primary { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; }
+        .btn-primary { width: 100%; padding: 12px; background: #00a884; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px; margin-bottom: 10px; }
         .btn-primary:hover { background: #008f6f; }
+        .btn-secondary { background: #e9edef; color: #111b21; }
+        .btn-secondary:hover { background: #d1d7db; }
+        .auth-link { color: #00a884; cursor: pointer; font-size: 14px; }
+        .auth-link:hover { text-decoration: underline; }
+        .credentials-box { background: #f0f2f5; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left; }
+        .credentials-box p { margin: 5px 0; font-size: 14px; }
+        .credentials-box span { font-weight: 600; color: #111b21; }
 
         /* Main App Layout */
         .app-layout { width: 100vw; height: 100vh; display: flex; background: #fff; overflow: hidden; position: relative; }
@@ -90,16 +98,52 @@
 </head>
 <body>
 
-    <!-- Account Setup Screen -->
-    <div class="auth-container" id="authScreen">
+    <!-- AUTH AREA -->
+    <!-- Selection Screen -->
+    <div class="auth-container auth-screen active" id="selectionScreen">
         <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
             <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
         </a>
         <h1>VIBE</h1>
         <p class="subtitle">CREATED BY MUHAMMAD TAQI</p>
-        <input type="text" id="nameInput" class="auth-input" placeholder="Your Name" maxlength="20">
-        <input type="text" id="customIdInput" class="auth-input" placeholder="Enter 12-60 Digit Custom ID" maxlength="60">
-        <button class="btn-primary" onclick="createProfile()">Create & Save Account</button>
+        <button class="btn-primary" onclick="showCreateAccount()">Create New Account</button>
+        <button class="btn-primary btn-secondary" onclick="showLogin()">Login</button>
+    </div>
+
+    <!-- Create Account Screen -->
+    <div class="auth-container auth-screen" id="createAccountScreen">
+        <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
+            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
+        </a>
+        <h1>Create Account</h1>
+        <p class="subtitle">Enter your name to get a random ID and password</p>
+        <div id="createAccountForm">
+            <input type="text" id="createNameInput" class="auth-input" placeholder="Your Name" maxlength="20">
+            <button class="btn-primary" onclick="createAccount()">Create Account</button>
+        </div>
+        <div id="accountCreatedInfo" style="display: none;">
+            <div class="credentials-box">
+                <p>Your ID: <span id="generatedIdDisplay"></span></p>
+                <p>Your Password: <span id="generatedPasswordDisplay"></span></p>
+            </div>
+            <p style="font-size: 12px; color: #667781; margin: 10px 0;">Save these credentials securely!</p>
+            <button class="btn-primary" onclick="continueToApp()">Continue to Chat</button>
+        </div>
+        <p class="auth-link" onclick="showSelection()">← Back</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="auth-container auth-screen" id="loginScreen">
+        <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
+            <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
+        </a>
+        <h1>Login</h1>
+        <p class="subtitle">Enter your credentials</p>
+        <input type="text" id="loginNameInput" class="auth-input" placeholder="Name (any)" maxlength="20">
+        <input type="text" id="loginIdInput" class="auth-input" placeholder="ID" maxlength="25">
+        <input type="password" id="loginPasswordInput" class="auth-input" placeholder="Password">
+        <button class="btn-primary" onclick="login()">Login</button>
+        <p class="auth-link" onclick="showSelection()">← Back</p>
     </div>
 
     <!-- Main Messenger Interface -->
@@ -117,6 +161,7 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <i class="fa-solid fa-gear" title="Settings / Show Password" onclick="showSettings()"></i>
                     <i class="fa-solid fa-user-plus" title="Add Contact" onclick="openModal()"></i>
                 </div>
             </div>
@@ -162,13 +207,11 @@
                 </div>
 
                 <div class="chat-messages" id="chatMessages"></div>
-
                 <div class="chat-footer">
                     <label for="fileInput" class="media-btn" title="Send Image or Video">
                         <i class="fa-solid fa-paperclip"></i>
                     </label>
                     <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
-                    
                     <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                     <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
@@ -181,11 +224,23 @@
         <div class="modal-content">
             <div class="modal-header">Add New Contact</div>
             <input type="text" id="friendNameInput" class="auth-input" placeholder="Contact Name" maxlength="20">
-            <input type="text" id="friendIdInput" class="auth-input" placeholder="Enter 12-60 Digit ID" maxlength="60">
+            <input type="text" id="friendIdInput" class="auth-input" placeholder="Enter 12-25 Digit ID" maxlength="25">
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="btn-primary" style="background: #e9edef; color: #111b21;" onclick="closeModal()">Cancel</button>
                 <button class="btn-primary" onclick="saveContact()">Add & Save</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">Account Settings</div>
+            <p style="font-size: 14px; margin-bottom: 10px;">Your current password is:</p>
+            <div class="credentials-box">
+                <p><span id="currentPasswordDisplay"></span></p>
+            </div>
+            <button class="btn-primary" onclick="closeSettings()">Close</button>
         </div>
     </div>
 
@@ -208,29 +263,134 @@
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 initPeer();
+            } else {
+                showSelection();
             }
         };
 
-        function createProfile() {
-            const name = document.getElementById('nameInput').value.trim();
-            const customId = document.getElementById('customIdInput').value.trim();
+        // ----- Auth navigation -----
+        function showSelection() {
+            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('selectionScreen').classList.add('active');
+        }
+
+        function showCreateAccount() {
+            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('createAccountScreen').classList.add('active');
+            document.getElementById('createAccountForm').style.display = 'block';
+            document.getElementById('accountCreatedInfo').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('loginScreen').classList.add('active');
+        }
+
+        function hideAllAuthScreens() {
+            document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('appLayout').style.display = 'flex';
+        }
+
+        // ----- Password generation based on ID -----
+        function generatePassword(id) {
+            return id.split('').map(d => String.fromCharCode(97 + parseInt(d))).join('');
+        }
+
+        // ----- Generate unique random ID -----
+        function generateUniqueId() {
+            let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
+            let usedIds = accounts.map(a => a.id);
+            if (currentUser && currentUser.id) usedIds.push(currentUser.id);
+
+            let length = 12;
+            const maxAttempts = 1000; // safety limit
+            while (true) {
+                const totalPossible = Math.pow(10, length);
+                if (usedIds.length >= totalPossible) {
+                    length++;
+                    continue;
+                }
+                let candidate = '';
+                for (let i = 0; i < length; i++) {
+                    candidate += Math.floor(Math.random() * 10);
+                }
+                if (!usedIds.includes(candidate)) {
+                    return candidate;
+                }
+                // If we somehow exhaust attempts, increase length
+                if (--maxAttempts <= 0) {
+                    length++;
+                    maxAttempts = 1000;
+                }
+            }
+        }
+
+        // ----- Create Account -----
+        function createAccount() {
+            const name = document.getElementById('createNameInput').value.trim();
+            if (!name) return alert('Please enter your name');
+
+            const id = generateUniqueId();
+            const password = generatePassword(id);
+
+            // Save to accounts list
+            let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
+            accounts.push({ name, id, password });
+            localStorage.setItem('vibe_accounts', JSON.stringify(accounts));
+
+            // Set current user
+            currentUser = { name, id, password };
+            localStorage.setItem('vibe_user', JSON.stringify(currentUser));
+
+            // Show generated credentials
+            document.getElementById('generatedIdDisplay').innerText = id;
+            document.getElementById('generatedPasswordDisplay').innerText = password;
+            document.getElementById('createAccountForm').style.display = 'none';
+            document.getElementById('accountCreatedInfo').style.display = 'block';
+        }
+
+        function continueToApp() {
+            initPeer();
+        }
+
+        // ----- Login -----
+        function login() {
+            const name = document.getElementById('loginNameInput').value.trim();
+            const id = document.getElementById('loginIdInput').value.trim();
+            const password = document.getElementById('loginPasswordInput').value.trim();
 
             if (!name) return alert('Please enter your name');
-            if (!/^[0-9]{12,60}$/.test(customId)) return alert('ID must be between 12 and 60 digits!');
+            if (!id || !password) return alert('Please enter both ID and password');
 
-            currentUser = { name, id: customId };
+            const accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
+            const account = accounts.find(a => a.id === id && a.password === password);
+            if (!account) {
+                return alert('Invalid ID or password');
+            }
+
+            currentUser = { name, id, password }; // use the name entered (any name allowed)
             localStorage.setItem('vibe_user', JSON.stringify(currentUser));
             initPeer();
         }
 
+        // ----- Settings -----
+        function showSettings() {
+            const pwd = currentUser && currentUser.password ? currentUser.password : 'Not set';
+            document.getElementById('currentPasswordDisplay').innerText = pwd;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // ----- PeerJS initialisation (existing logic) -----
         function initPeer() {
             if (peer) peer.destroy();
 
             peer = new Peer('vibe-' + currentUser.id);
 
             peer.on('open', () => {
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('appLayout').style.display = 'flex';
+                hideAllAuthScreens();
                 document.getElementById('myProfileName').innerText = currentUser.name;
                 document.getElementById('myProfileId').innerText = 'ID: ' + currentUser.id;
                 renderContacts();
@@ -257,16 +417,7 @@
                 });
             });
 
-            peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    alert('This ID is already taken by someone else! Please choose a different ID.');
-                    localStorage.removeItem('vibe_user');
-                    document.getElementById('authScreen').style.display = 'block';
-                    document.getElementById('appLayout').style.display = 'none';
-                } else {
-                    console.error('PeerJS Error:', err);
-                }
-            });
+            peer.on('error', (err) => console.error('PeerJS Error:', err));
         }
 
         function openModal() { document.getElementById('addContactModal').style.display = 'flex'; }
@@ -277,7 +428,7 @@
             const friendId = document.getElementById('friendIdInput').value.trim();
 
             if (!friendName) return alert('Enter contact name');
-            if (!/^[0-9]{12,60}$/.test(friendId)) return alert('Enter a valid 12-60 digit ID');
+            if (!/^[0-9]{12,25}$/.test(friendId)) return alert('Enter a valid 12-25 digit ID');
             if (friendId === currentUser.id) return alert('You cannot add your own ID!');
 
             if (!contacts.some(c => c.id === friendId)) {
@@ -369,7 +520,6 @@
             };
 
             const conn = connections[activeFriendId];
-
             if (conn && conn.open) {
                 conn.send(payload);
             } else {
@@ -405,7 +555,6 @@
 
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             messagesDB[friendId].push({ text, type, time, msgType, mediaUrl });
-
             localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
         }
 
@@ -417,7 +566,7 @@
             list.forEach(msg => {
                 const div = document.createElement('div');
                 div.className = `msg-bubble ${msg.type}`;
-
+                
                 let contentHTML = '';
                 if (msg.msgType === 'image') {
                     contentHTML += `<img src="${msg.mediaUrl}" alt="Sent Image">`;
