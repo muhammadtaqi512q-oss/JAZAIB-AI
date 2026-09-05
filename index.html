@@ -52,9 +52,12 @@
         .search-wrapper i { position: absolute; left: 12px; top: 10px; color: #54656f; font-size: 12px; }
 
         .contacts-list { flex: 1; overflow-y: auto; }
-        .contact-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f6f6; transition: background 0.2s; }
+        .contact-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f6f6; transition: background 0.2s; position: relative; }
         .contact-item:hover, .contact-item.active { background: #f0f2f5; }
-        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #00a884; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; margin-right: 12px; flex-shrink: 0; overflow: hidden; }
+        .avatar-container { position: relative; margin-right: 12px; }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #00a884; color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 16px; flex-shrink: 0; overflow: hidden; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; border: 2px solid #fff; position: absolute; bottom: 0; right: 0; }
+        .status-dot.online { background: #25d366; }
         .contact-details { flex: 1; overflow: hidden; }
         .contact-title { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: #111b21; }
         .last-msg { font-size: 12px; color: #667781; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
@@ -65,7 +68,9 @@
         .chat-header-user { display: flex; align-items: center; gap: 12px; }
         .back-btn { font-size: 18px; color: #54656f; cursor: pointer; padding: 5px; }
         .back-btn:hover { color: #00a884; }
-        .chat-header-actions { display: flex; gap: 10px; }
+        .chat-header-actions { display: flex; gap: 12px; align-items: center; }
+        .call-icon { font-size: 18px; color: #00a884; cursor: pointer; padding: 6px; }
+        .call-icon:hover { color: #008f6f; }
         .chat-action-btn { background: #ea4335; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .chat-action-btn.secondary { background: #54656f; }
         .chat-action-btn:hover { opacity: 0.9; }
@@ -74,19 +79,22 @@
         .msg-bubble { max-width: 65%; padding: 8px 12px; border-radius: 8px; font-size: 14px; line-height: 19px; position: relative; word-wrap: break-word; box-shadow: 0 1px 0.5px rgba(11,20,26,0.13); }
         .msg-bubble.me { background: #d9fdd3; align-self: flex-end; border-top-right-radius: 0; }
         .msg-bubble.them { background: #ffffff; align-self: flex-start; border-top-left-radius: 0; }
-        .msg-bubble img, .msg-bubble video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-bottom: 4px; display: block; }
+        .msg-bubble img, .msg-bubble video, .msg-bubble audio { max-width: 100%; max-height: 250px; border-radius: 8px; margin-bottom: 4px; display: block; }
         .msg-time { font-size: 10px; color: #667781; text-align: right; margin-top: 2px; }
+        .msg-status { font-size: 10px; color: #8696a0; text-align: right; }
 
         .chat-footer { height: 62px; background: #f0f2f5; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
         .message-input { flex: 1; padding: 11px 16px; border: none; border-radius: 8px; font-size: 14px; outline: none; background: #ffffff; }
         .media-btn { color: #54656f; font-size: 20px; cursor: pointer; padding: 5px; }
         .media-btn:hover { color: #00a884; }
+        .mic-btn { color: #54656f; font-size: 20px; cursor: pointer; padding: 5px; border: none; background: transparent; }
+        .mic-btn.recording { color: #ea4335; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .send-btn { background: #00a884; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
 
         .empty-chat { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f2f5; color: #667781; text-align: center; }
         .empty-chat img { width: 100px; height: 100px; margin-bottom: 15px; border-radius: 50%; }
 
-        /* Full Screen Toggle Classes */
         .app-layout.full-chat .sidebar { display: none; }
         .app-layout.full-chat .main-chat { display: flex; width: 100%; }
 
@@ -94,12 +102,21 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,20,26,0.4); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #ffffff; width: 360px; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
         .modal-header { font-size: 18px; font-weight: 600; color: #111b21; margin-bottom: 15px; }
+
+        /* Call Screen Overlay */
+        .call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #111b21; z-index: 2000; flex-direction: column; justify-content: space-between; padding: 20px; align-items: center; }
+        .call-overlay.active { display: flex; }
+        .video-container { position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; }
+        video#remoteVideo { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+        video#localVideo { width: 100px; height: 140px; object-fit: cover; position: absolute; bottom: 10px; right: 10px; border-radius: 8px; border: 2px solid #fff; }
+        .call-controls { display: flex; gap: 20px; margin-bottom: 20px; }
+        .btn-call-action { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .btn-end-call { background: #ea4335; }
     </style>
 </head>
 <body>
 
     <!-- AUTH AREA -->
-    <!-- Selection Screen -->
     <div class="auth-container auth-screen active" id="selectionScreen">
         <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
             <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
@@ -108,9 +125,9 @@
         <p class="subtitle">CREATED BY MUHAMMAD TAQI</p>
         <button class="btn-primary" onclick="showCreateAccount()">Create New Account</button>
         <button class="btn-primary btn-secondary" onclick="showLogin()">Login</button>
+        <a href="1.html" style="display:block; margin-top:10px; color:#00a884; text-decoration:none; font-size:14px; font-weight:600;">OFFLINE GAMES</a>
     </div>
 
-    <!-- Create Account Screen -->
     <div class="auth-container auth-screen" id="createAccountScreen">
         <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
             <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
@@ -132,23 +149,21 @@
         <p class="auth-link" onclick="showSelection()">← Back</p>
     </div>
 
-    <!-- Login Screen -->
     <div class="auth-container auth-screen" id="loginScreen">
         <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
             <img src="icon.png" alt="VIBE Icon" class="app-logo clickable-icon">
         </a>
         <h1>Login</h1>
         <p class="subtitle">Enter your credentials</p>
-        <input type="text" id="loginNameInput" class="auth-input" placeholder="Name (any)" maxlength="20">
-        <input type="text" id="loginIdInput" class="auth-input" placeholder="ID" maxlength="25">
+        <input type="text" id="loginNameInput" class="auth-input" placeholder="Display Name" maxlength="20">
+        <input type="text" id="loginIdInput" class="auth-input" placeholder="ID (Digits only)" maxlength="25">
         <input type="password" id="loginPasswordInput" class="auth-input" placeholder="Password">
         <button class="btn-primary" onclick="login()">Login</button>
         <p class="auth-link" onclick="showSelection()">← Back</p>
     </div>
 
-    <!-- Main Messenger Interface -->
+    <!-- MAIN APP INTERFACE -->
     <div class="app-layout" id="appLayout" style="display: none;">
-        <!-- Left Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="user-brand">
@@ -176,7 +191,6 @@
             <div class="contacts-list" id="contactsContainer"></div>
         </div>
 
-        <!-- Right Chat Panel -->
         <div class="main-chat">
             <div id="emptyChatView" class="empty-chat">
                 <a href="https://taqi.oneapp.dev" target="_blank" title="Visit taqi.oneapp.dev">
@@ -193,15 +207,17 @@
                         <div class="avatar" id="activeAvatar">?</div>
                         <div>
                             <div class="profile-name" id="activeContactName">Friend</div>
-                            <div class="profile-id" id="activeContactId">ID: -</div>
+                            <div class="profile-id" id="activeContactStatus" style="font-size: 11px; color: #667781;">Offline</div>
                         </div>
                     </div>
                     <div class="chat-header-actions">
-                        <button class="chat-action-btn secondary" onclick="deleteChat()" title="Delete all messages with this contact">
-                            <i class="fa-solid fa-broom"></i> Clear Chat
+                        <i class="fa-solid fa-phone call-icon" title="Voice Call" onclick="startCall(false)"></i>
+                        <i class="fa-solid fa-video call-icon" title="Video Call" onclick="startCall(true)"></i>
+                        <button class="chat-action-btn secondary" onclick="deleteChat()" title="Delete all messages">
+                            <i class="fa-solid fa-broom"></i>
                         </button>
                         <button class="chat-action-btn" onclick="deleteContact()" title="Delete contact permanently">
-                            <i class="fa-solid fa-trash"></i> Delete Contact
+                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
                 </div>
@@ -212,6 +228,11 @@
                         <i class="fa-solid fa-paperclip"></i>
                     </label>
                     <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
+                    
+                    <button class="mic-btn" id="micBtn" onclick="toggleVoiceRecord()" title="Record Voice Message">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+
                     <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                     <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
@@ -219,7 +240,19 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Contact -->
+    <!-- CALL OVERLAY -->
+    <div class="call-overlay" id="callOverlay">
+        <h3 id="callStatusText" style="color:white; margin-top:20px;">Calling...</h3>
+        <div class="video-container">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="call-controls">
+            <button class="btn-call-action btn-end-call" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
     <div class="modal" id="addContactModal">
         <div class="modal-content">
             <div class="modal-header">Add New Contact</div>
@@ -251,14 +284,27 @@
         let contacts = [];
         let messagesDB = {};
         let activeFriendId = null;
+        let pendingOutbox = {};
+        let onlineStatus = {};
+
+        // Audio/Video Call state
+        let currentCall = null;
+        let localStream = null;
+
+        // Voice Recording State
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
 
         window.onload = function() {
             const savedUser = localStorage.getItem('vibe_user');
             const savedContacts = localStorage.getItem('vibe_contacts');
             const savedMessages = localStorage.getItem('vibe_messages');
+            const savedPending = localStorage.getItem('vibe_pending');
 
             if (savedContacts) contacts = JSON.parse(savedContacts);
             if (savedMessages) messagesDB = JSON.parse(savedMessages);
+            if (savedPending) pendingOutbox = JSON.parse(savedPending);
 
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
@@ -268,7 +314,6 @@
             }
         };
 
-        // ----- Auth navigation -----
         function showSelection() {
             document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
             document.getElementById('selectionScreen').classList.add('active');
@@ -291,41 +336,26 @@
             document.getElementById('appLayout').style.display = 'flex';
         }
 
-        // ----- Password generation based on ID -----
         function generatePassword(id) {
+            if(!/^\d+$/.test(id)) return "";
             return id.split('').map(d => String.fromCharCode(97 + parseInt(d))).join('');
         }
 
-        // ----- Generate unique random ID -----
         function generateUniqueId() {
             let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
             let usedIds = accounts.map(a => a.id);
             if (currentUser && currentUser.id) usedIds.push(currentUser.id);
 
             let length = 12;
-            const maxAttempts = 1000; // safety limit
+            let maxAttempts = 1000;
             while (true) {
-                const totalPossible = Math.pow(10, length);
-                if (usedIds.length >= totalPossible) {
-                    length++;
-                    continue;
-                }
                 let candidate = '';
-                for (let i = 0; i < length; i++) {
-                    candidate += Math.floor(Math.random() * 10);
-                }
-                if (!usedIds.includes(candidate)) {
-                    return candidate;
-                }
-                // If we somehow exhaust attempts, increase length
-                if (--maxAttempts <= 0) {
-                    length++;
-                    maxAttempts = 1000;
-                }
+                for (let i = 0; i < length; i++) candidate += Math.floor(Math.random() * 10);
+                if (!usedIds.includes(candidate)) return candidate;
+                if (--maxAttempts <= 0) { length++; maxAttempts = 1000; }
             }
         }
 
-        // ----- Create Account -----
         function createAccount() {
             const name = document.getElementById('createNameInput').value.trim();
             if (!name) return alert('Please enter your name');
@@ -333,27 +363,21 @@
             const id = generateUniqueId();
             const password = generatePassword(id);
 
-            // Save to accounts list
             let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
             accounts.push({ name, id, password });
             localStorage.setItem('vibe_accounts', JSON.stringify(accounts));
 
-            // Set current user
             currentUser = { name, id, password };
             localStorage.setItem('vibe_user', JSON.stringify(currentUser));
 
-            // Show generated credentials
             document.getElementById('generatedIdDisplay').innerText = id;
             document.getElementById('generatedPasswordDisplay').innerText = password;
             document.getElementById('createAccountForm').style.display = 'none';
             document.getElementById('accountCreatedInfo').style.display = 'block';
         }
 
-        function continueToApp() {
-            initPeer();
-        }
+        function continueToApp() { initPeer(); }
 
-        // ----- Login -----
         function login() {
             const name = document.getElementById('loginNameInput').value.trim();
             const id = document.getElementById('loginIdInput').value.trim();
@@ -362,28 +386,28 @@
             if (!name) return alert('Please enter your name');
             if (!id || !password) return alert('Please enter both ID and password');
 
-            const accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
-            const account = accounts.find(a => a.id === id && a.password === password);
-            if (!account) {
-                return alert('Invalid ID or password');
+            const expectedPassword = generatePassword(id);
+            if (expectedPassword !== "" && password === expectedPassword) {
+                let accounts = JSON.parse(localStorage.getItem('vibe_accounts') || '[]');
+                if (!accounts.some(a => a.id === id)) {
+                    accounts.push({ name, id, password });
+                    localStorage.setItem('vibe_accounts', JSON.stringify(accounts));
+                }
+                currentUser = { name, id, password };
+                localStorage.setItem('vibe_user', JSON.stringify(currentUser));
+                initPeer();
+            } else {
+                alert('Invalid ID or Password!');
             }
-
-            currentUser = { name, id, password }; // use the name entered (any name allowed)
-            localStorage.setItem('vibe_user', JSON.stringify(currentUser));
-            initPeer();
         }
 
-        // ----- Settings -----
         function showSettings() {
-            const pwd = currentUser && currentUser.password ? currentUser.password : 'Not set';
-            document.getElementById('currentPasswordDisplay').innerText = pwd;
+            document.getElementById('currentPasswordDisplay').innerText = currentUser?.password || 'Not set';
             document.getElementById('settingsModal').style.display = 'flex';
         }
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
 
-        // ----- PeerJS initialisation (existing logic) -----
+        /* ----- PeerJS & Handshake Setup ----- */
         function initPeer() {
             if (peer) peer.destroy();
 
@@ -394,31 +418,182 @@
                 document.getElementById('myProfileName').innerText = currentUser.name;
                 document.getElementById('myProfileId').innerText = 'ID: ' + currentUser.id;
                 renderContacts();
+                
+                // Ping saved contacts to check online presence
+                contacts.forEach(c => tryToConnect(c.id));
             });
 
             peer.on('connection', (conn) => {
                 const incomingId = conn.peer.replace('vibe-', '');
                 connections[incomingId] = conn;
+                onlineStatus[incomingId] = true;
+                renderContacts();
 
-                conn.on('data', (data) => {
-                    if (data.type === 'chat') {
-                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
-                        
-                        if (!contacts.some(c => c.id === data.fromId)) {
-                            contacts.push({ name: data.fromName, id: data.fromId });
-                            localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
-                            renderContacts();
-                        }
-
-                        if (activeFriendId === data.fromId) {
-                            renderMessages();
-                        }
-                    }
+                conn.on('data', (data) => handleIncomingData(data, incomingId));
+                conn.on('close', () => {
+                    onlineStatus[incomingId] = false;
+                    renderContacts();
                 });
+
+                // Respond to presence check
+                conn.send({ type: 'presence', status: 'online', fromId: currentUser.id });
+                flushPendingMessages(incomingId);
+            });
+
+            // Handle Incoming Video/Audio Call
+            peer.on('call', (call) => {
+                if (confirm("Incoming Call from " + call.peer.replace('vibe-', '') + ". Accept?")) {
+                    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+                        localStream = stream;
+                        document.getElementById('localVideo').srcObject = stream;
+                        document.getElementById('callOverlay').classList.add('active');
+                        document.getElementById('callStatusText').innerText = "In Call";
+
+                        call.answer(stream);
+                        currentCall = call;
+
+                        call.on('stream', (remoteStream) => {
+                            document.getElementById('remoteVideo').srcObject = remoteStream;
+                        });
+                        call.on('close', () => endCall());
+                    }).catch(err => alert("Error accessing media devices: " + err));
+                }
             });
 
             peer.on('error', (err) => console.error('PeerJS Error:', err));
         }
+
+        function handleIncomingData(data, senderId) {
+            if (data.type === 'presence') {
+                onlineStatus[senderId] = (data.status === 'online');
+                renderContacts();
+            } else if (data.type === 'chat') {
+                saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
+                if (!contacts.some(c => c.id === data.fromId)) {
+                    contacts.push({ name: data.fromName, id: data.fromId });
+                    localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
+                }
+                renderContacts();
+                if (activeFriendId === data.fromId) renderMessages();
+            }
+        }
+
+        function tryToConnect(friendId) {
+            if (connections[friendId] && connections[friendId].open) return;
+            if (friendId === currentUser.id) return;
+
+            const conn = peer.connect('vibe-' + friendId, { reliable: true });
+            connections[friendId] = conn;
+
+            conn.on('open', () => {
+                onlineStatus[friendId] = true;
+                renderContacts();
+                conn.send({ type: 'presence', status: 'online', fromId: currentUser.id });
+                flushPendingMessages(friendId);
+            });
+
+            conn.on('data', (data) => handleIncomingData(data, friendId));
+            conn.on('close', () => {
+                onlineStatus[friendId] = false;
+                renderContacts();
+            });
+            conn.on('error', () => {
+                onlineStatus[friendId] = false;
+                renderContacts();
+            });
+        }
+
+        /* ----- Voice Recording Functionality ----- */
+        function toggleVoiceRecord() {
+            const micBtn = document.getElementById('micBtn');
+            if (!isRecording) {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            sendMessage('audio', reader.result);
+                        };
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                }).catch(err => alert("Microphone Permission Denied or Not Supported: " + err));
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            }
+        }
+
+        /* ----- Audio & Video Calling ----- */
+        function startCall(isVideo) {
+            if (!activeFriendId) return;
+            if (!onlineStatus[activeFriendId]) return alert("User is offline. Cannot initiate call.");
+
+            navigator.mediaDevices.getUserMedia({ video: isVideo, audio: true }).then((stream) => {
+                localStream = stream;
+                document.getElementById('localVideo').srcObject = stream;
+                document.getElementById('callOverlay').classList.add('active');
+                document.getElementById('callStatusText').innerText = "Calling " + activeFriendId + "...";
+
+                const call = peer.call('vibe-' + activeFriendId, stream);
+                currentCall = call;
+
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('callStatusText').innerText = "Connected";
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                });
+                call.on('close', () => endCall());
+            }).catch(err => alert("Camera/Microphone Permission required: " + err));
+        }
+
+        function endCall() {
+            if (currentCall) currentCall.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            document.getElementById('callOverlay').classList.remove('active');
+            document.getElementById('remoteVideo').srcObject = null;
+            document.getElementById('localVideo').srcObject = null;
+            currentCall = null;
+        }
+
+        /* ----- Pending & Sending Logic ----- */
+        function flushPendingMessages(friendId) {
+            if (!pendingOutbox[friendId] || pendingOutbox[friendId].length === 0) return;
+            const conn = connections[friendId];
+            if (!conn || !conn.open) return;
+
+            const pendingList = pendingOutbox[friendId];
+            for (const payload of pendingList) {
+                conn.send(payload);
+                markMessageSent(friendId, payload);
+            }
+            delete pendingOutbox[friendId];
+            savePendingOutbox();
+            renderContacts();
+        }
+
+        function markMessageSent(friendId, payload) {
+            if (!messagesDB[friendId]) return;
+            const list = messagesDB[friendId];
+            for (let i = list.length - 1; i >= 0; i--) {
+                const msg = list[i];
+                if (msg.type === 'me' && msg.msgType === payload.msgType) {
+                    msg.status = 'sent';
+                    break;
+                }
+            }
+            localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
+        }
+
+        function savePendingOutbox() { localStorage.setItem('vibe_pending', JSON.stringify(pendingOutbox)); }
 
         function openModal() { document.getElementById('addContactModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('addContactModal').style.display = 'none'; }
@@ -446,12 +621,14 @@
             container.innerHTML = '';
 
             contacts.forEach(c => {
+                const isOnline = !!onlineStatus[c.id];
                 const userMsgs = messagesDB[c.id] || [];
                 let lastMsg = 'Click to chat';
                 if (userMsgs.length > 0) {
                     const last = userMsgs[userMsgs.length - 1];
                     if (last.msgType === 'image') lastMsg = '📷 Photo';
                     else if (last.msgType === 'video') lastMsg = '🎥 Video';
+                    else if (last.msgType === 'audio') lastMsg = '🎙️ Voice Message';
                     else lastMsg = last.text;
                 }
 
@@ -460,7 +637,10 @@
                 item.onclick = () => selectContact(c.id);
 
                 item.innerHTML = `
-                    <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+                    <div class="avatar-container">
+                        <div class="avatar">${c.name.charAt(0).toUpperCase()}</div>
+                        <div class="status-dot ${isOnline ? 'online' : ''}"></div>
+                    </div>
                     <div class="contact-details">
                         <div class="contact-title">
                             <span>${c.name}</span>
@@ -470,6 +650,14 @@
                 `;
                 container.appendChild(item);
             });
+
+            if (activeFriendId) {
+                const statusElem = document.getElementById('activeContactStatus');
+                if (statusElem) {
+                    statusElem.innerText = onlineStatus[activeFriendId] ? 'Online' : 'Offline';
+                    statusElem.style.color = onlineStatus[activeFriendId] ? '#00a884' : '#667781';
+                }
+            }
         }
 
         function selectContact(friendId) {
@@ -481,29 +669,15 @@
 
             document.getElementById('activeAvatar').innerText = contact ? contact.name.charAt(0).toUpperCase() : '?';
             document.getElementById('activeContactName').innerText = contact ? contact.name : friendId;
-            document.getElementById('activeContactId').innerText = 'ID: ' + friendId;
 
             document.getElementById('appLayout').classList.add('full-chat');
 
-            if (!connections[friendId]) {
-                const conn = peer.connect('vibe-' + friendId, { reliable: true });
-                connections[friendId] = conn;
-
-                conn.on('data', (data) => {
-                    if (data.type === 'chat') {
-                        saveMessage(data.fromId, data.fromName, data.text, 'them', data.msgType, data.mediaUrl);
-                        if (activeFriendId === data.fromId) renderMessages();
-                    }
-                });
-            }
-
+            tryToConnect(friendId);
             renderContacts();
             renderMessages();
         }
 
-        function goBackToContacts() {
-            document.getElementById('appLayout').classList.remove('full-chat');
-        }
+        function goBackToContacts() { document.getElementById('appLayout').classList.remove('full-chat'); }
 
         function sendMessage(msgType = 'text', mediaUrl = null) {
             const input = document.getElementById('messageInput');
@@ -516,21 +690,22 @@
                 fromId: currentUser.id,
                 text: text,
                 msgType: msgType,
-                mediaUrl: mediaUrl
+                mediaUrl: mediaUrl,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
 
             const conn = connections[activeFriendId];
             if (conn && conn.open) {
                 conn.send(payload);
+                saveMessage(activeFriendId, currentUser.name, text, 'me', msgType, mediaUrl, 'sent');
             } else {
-                const newConn = peer.connect('vibe-' + activeFriendId, { reliable: true });
-                connections[activeFriendId] = newConn;
-                newConn.on('open', () => {
-                    newConn.send(payload);
-                });
+                saveMessage(activeFriendId, currentUser.name, text, 'me', msgType, mediaUrl, 'pending');
+                if (!pendingOutbox[activeFriendId]) pendingOutbox[activeFriendId] = [];
+                pendingOutbox[activeFriendId].push(payload);
+                savePendingOutbox();
+                tryToConnect(activeFriendId);
             }
 
-            saveMessage(activeFriendId, currentUser.name, text, 'me', msgType, mediaUrl);
             if (msgType === 'text') input.value = '';
             renderMessages();
             renderContacts();
@@ -542,19 +717,17 @@
 
             const reader = new FileReader();
             reader.onload = function(event) {
-                const base64Data = event.target.result;
                 const isVideo = file.type.startsWith('video');
-                sendMessage(isVideo ? 'video' : 'image', base64Data);
+                sendMessage(isVideo ? 'video' : 'image', event.target.result);
             };
             reader.readAsDataURL(file);
             e.target.value = '';
         }
 
-        function saveMessage(friendId, senderName, text, type, msgType = 'text', mediaUrl = null) {
+        function saveMessage(friendId, senderName, text, type, msgType = 'text', mediaUrl = null, status = 'sent') {
             if (!messagesDB[friendId]) messagesDB[friendId] = [];
-
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            messagesDB[friendId].push({ text, type, time, msgType, mediaUrl });
+            messagesDB[friendId].push({ text, type, time, msgType, mediaUrl, status });
             localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
         }
 
@@ -569,13 +742,18 @@
                 
                 let contentHTML = '';
                 if (msg.msgType === 'image') {
-                    contentHTML += `<img src="${msg.mediaUrl}" alt="Sent Image">`;
+                    contentHTML += `<img src="${msg.mediaUrl}" alt="Photo">`;
                 } else if (msg.msgType === 'video') {
                     contentHTML += `<video src="${msg.mediaUrl}" controls></video>`;
+                } else if (msg.msgType === 'audio') {
+                    contentHTML += `<audio src="${msg.mediaUrl}" controls></audio>`;
                 }
 
                 if (msg.text) contentHTML += `<div>${msg.text}</div>`;
                 contentHTML += `<div class="msg-time">${msg.time}</div>`;
+                if (msg.type === 'me' && msg.status === 'pending') {
+                    contentHTML += `<div class="msg-status">⏳ Pending</div>`;
+                }
 
                 div.innerHTML = contentHTML;
                 container.appendChild(div);
@@ -599,22 +777,23 @@
             if (confirm("Permanently delete this contact?")) {
                 contacts = contacts.filter(c => c.id !== activeFriendId);
                 localStorage.setItem('vibe_contacts', JSON.stringify(contacts));
-
                 delete messagesDB[activeFriendId];
                 localStorage.setItem('vibe_messages', JSON.stringify(messagesDB));
+
+                if (pendingOutbox[activeFriendId]) {
+                    delete pendingOutbox[activeFriendId];
+                    savePendingOutbox();
+                }
 
                 activeFriendId = null;
                 document.getElementById('activeChatView').style.display = 'none';
                 document.getElementById('emptyChatView').style.display = 'flex';
-
                 goBackToContacts();
                 renderContacts();
             }
         }
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
     </script>
 </body>
 </html>
