@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hill Climb 2026 - Dev by Muhammad Taqi</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; touch-action: none; color: #fff; }
+        canvas { display: block; }
+        .layer { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; background: radial-gradient(circle, #1a1a2e 0%, #050510 100%); z-index: 100; overflow-y: auto; padding-top: 20px; }
+        #game-ui { background: none; pointer-events: none; z-index: 10; display: none; }
+        
+        /* DEVELOPER BRANDING */
+        .owner-card { background: rgba(0, 255, 255, 0.1); border: 2px solid #0ff; padding: 15px; border-radius: 15px; margin: 15px 0; width: 300px; text-align: center; box-shadow: 0 0 15px rgba(0, 255, 255, 0.3); }
+        .owner-name { color: #0ff; font-size: 18px; text-transform: uppercase; }
+        .owner-title { color: #fff; font-size: 11px; letter-spacing: 1px; margin: 5px 0; }
+        .lang-tags { font-size: 10px; color: #ffcc00; }
+
+        #stats-hud { position: fixed; top: 15px; right: 20px; font-size: 24px; color: #ffcc00; z-index: 200; text-shadow: 2px 2px #000; }
+        .difficulty-indicator { position: fixed; top: 60px; left: 20px; font-size: 16px; font-weight: bold; z-index: 200; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 5px; }
+        
+        .btn { padding: 15px; margin: 8px; background: #ffcc00; color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 12px; width: 220px; font-size: 14px; text-transform: uppercase; box-shadow: 0 5px #a80; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px #a80; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 95%; max-width: 900px; padding: 20px 0; }
+        .card { border: 2px solid #444; padding: 10px; border-radius: 12px; text-align: center; background: #111; }
+        .card.selected { border-color: #0f0; background: #050; }
+        .locked { opacity: 0.5; filter: grayscale(1); }
+
+        .controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-around; pointer-events: auto; }
+        .ctrl-btn { width: 75px; height: 75px; background: rgba(255,255,255,0.1); border: 3px solid #fff; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; font-size: 10px; }
+        #fuel-bar { width: 100%; height: 100%; background: #0f0; }
+    </style>
+</head>
+<body>
+
+    <div id="stats-hud">💰 <span id="total-coins">0</span></div>
+    <div id="diff-tag" class="difficulty-indicator" style="display:none">MODE: NORMAL</div>
+
+    <div id="menu" class="layer">
+        <h1 style="color:#ffcc00; font-size: 36px; margin:0;">HILL CLIMB 2026</h1>
+        
+        <div class="owner-card">
+            <div class="owner-name">Muhammad Taqi</div>
+            <div class="owner-title">WEB • AI • GAME DEVELOPER</div>
+            <div class="lang-tags">HTML | CSS | JS | PYTHON | JAVA | C | C++</div>
+        </div>
+
+        <button class="btn" style="background:#0f0;" onclick="startGame()">🏁 START RACE</button>
+        <button class="btn" onclick="showLayer('garage')">🏎️ GARAGE (20)</button>
+        <button class="btn" onclick="showLayer('maps')">🌍 STAGES (14)</button>
+    </div>
+
+    <div id="maps" class="layer" style="display:none">
+        <h1>STAGES</h1><div class="grid" id="map-list"></div>
+        <button class="btn" style="background:#666; color:#fff;" onclick="showLayer('menu')">BACK</button>
+    </div>
+
+    <div id="garage" class="layer" style="display:none">
+        <h1>VEHICLES</h1><div class="grid" id="car-list"></div>
+        <button class="btn" style="background:#666; color:#fff;" onclick="showLayer('menu')">BACK</button>
+    </div>
+
+    <div id="game-ui" class="layer">
+        <div style="position:absolute; top:20px; left:20px; pointer-events: none;">
+            DIST: <span id="dist">0</span>m | BEST: <span id="best-dist">0</span>m
+            <div style="width:150px; height:10px; border:2px solid #fff; background:#000; margin-top:5px;"><div id="fuel-bar"></div></div>
+        </div>
+        <div class="controls">
+            <div class="ctrl-btn" id="btn-brake">BRAKE</div>
+            <div class="ctrl-btn" id="btn-left">TILT L</div>
+            <div class="ctrl-btn" id="btn-right">TILT R</div>
+            <div class="ctrl-btn" id="btn-gas">GAS</div>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+// --- FULL DATASET ---
+const carLibrary = [
+    { name: "Jeep 🚗", price: 0, power: 0.45, color: "#f0f", w: 60, h: 25 },
+    { name: "Oncoming 🚘", price: 1000, power: 0.48, color: "#44f", w: 60, h: 25 },
+    { name: "SUV 🚙", price: 2500, power: 0.50, color: "#2af", w: 70, h: 35 },
+    { name: "Pickup 🛻", price: 4000, power: 0.55, color: "#888", w: 75, h: 30 },
+    { name: "Racing 🏎️", price: 25000, power: 1.1, color: "#f00", w: 80, h: 18 },
+    { name: "Taxi 🚕", price: 3000, power: 0.46, color: "#ff0", w: 60, h: 25 },
+    { name: "Taxi 2 🚖", price: 3500, power: 0.47, color: "#ee0", w: 60, h: 25 },
+    { name: "Police 🚓", price: 7000, power: 0.65, color: "#fff", w: 65, h: 25 },
+    { name: "Police 2 🚔", price: 8000, power: 0.68, color: "#eee", w: 65, h: 25 },
+    { name: "Ambulance 🚑", price: 12000, power: 0.60, color: "#fff", w: 85, h: 45 },
+    { name: "Fire Truck 🚒", price: 15000, power: 0.70, color: "#f33", w: 100, h: 50 },
+    { name: "Minibus 🚐", price: 6000, power: 0.42, color: "#0fc", w: 80, h: 40 },
+    { name: "Bus 🚌", price: 10000, power: 0.38, color: "#fb0", w: 110, h: 55 },
+    { name: "Bus 2 🚍", price: 11000, power: 0.40, color: "#fa0", w: 110, h: 55 },
+    { name: "Trolley 🚎", price: 13000, power: 0.42, color: "#0cf", w: 110, h: 60 },
+    { name: "Delivery 🚚", price: 9000, power: 0.52, color: "#ddd", w: 100, h: 50 },
+    { name: "Semi 🚛", price: 20000, power: 0.58, color: "#555", w: 130, h: 60 },
+    { name: "Tractor 🚜", price: 5000, power: 0.75, w: 70, h: 45, color: "#0a0" },
+    { name: "Rickshaw 🛺", price: 2000, power: 0.40, color: "#0f0", w: 45, h: 40 },
+    { name: "Special 🎖️", price: 50000, power: 1.5, color: "#ff0", w: 90, h: 30 }
+];
+
+const mapLibrary = [
+    { name: "Country", price: 0, grav: 0.25, color: "#7cfc00", sky: "#87ceeb", bump: 50 },
+    { name: "Moon", price: 5000, grav: 0.08, color: "#aaa", sky: "#000", bump: 110 },
+    { name: "Mars", price: 8000, grav: 0.18, color: "#f50", sky: "#200", bump: 90 },
+    { name: "Arctic", price: 12000, grav: 0.26, color: "#fff", sky: "#aaf", bump: 75 },
+    { name: "Desert", price: 15000, grav: 0.25, color: "#edc", sky: "#fca", bump: 120 },
+    { name: "Nuclear", price: 20000, grav: 0.30, color: "#0f0", sky: "#020", bump: 85 },
+    { name: "Alien", price: 25000, grav: 0.35, color: "#f0f", sky: "#101", bump: 140 },
+    { name: "Caves", price: 30000, grav: 0.25, color: "#844", sky: "#100", bump: 150 },
+    { name: "Forest", price: 35000, grav: 0.28, color: "#252", sky: "#010", bump: 70 },
+    { name: "Mountain", price: 40000, grav: 0.32, color: "#778", sky: "#445", bump: 190 },
+    { name: "Volcano", price: 45000, grav: 0.25, color: "#f30", sky: "#200", bump: 110 },
+    { name: "Night", price: 50000, grav: 0.25, color: "#0cf", sky: "#001", bump: 55 },
+    { name: "Rainbow", price: 75000, grav: 0.15, color: "#f0f", sky: "#111", bump: 130 },
+    { name: "The Void", price: 100000, grav: 0.20, color: "#fff", sky: "#000", bump: 220 }
+];
+
+// --- LOGIC ---
+let saveData = { coins: 0, unlockedCars: [true], unlockedMaps: [true], highScores: Array(14).fill(0), currentCar: 0, currentMap: 0 };
+const S_KEY = 'TAQI_FINAL_BUILD';
+
+function save() { localStorage.setItem(S_KEY, JSON.stringify(saveData)); }
+function load() {
+    const d = localStorage.getItem(S_KEY);
+    if(d) saveData = JSON.parse(d);
+    updateUI();
+}
+
+function updateUI() {
+    document.getElementById('total-coins').innerText = saveData.coins.toLocaleString();
+    renderGrid('car-list', carLibrary, saveData.unlockedCars, 'currentCar', 'car');
+    renderGrid('map-list', mapLibrary, saveData.unlockedMaps, 'currentMap', 'map');
+}
+
+function renderGrid(id, lib, unlocked, key, mode) {
+    const el = document.getElementById(id); el.innerHTML = '';
+    lib.forEach((item, i) => {
+        const isLock = !unlocked[i], isSel = saveData[key] === i;
+        const best = mode === 'map' ? `<div style="font-size:9px">BEST: ${saveData.highScores[i]}m</div>` : '';
+        el.innerHTML += `<div class="card ${isLock?'locked':''} ${isSel?'selected':''}">
+            <div>${item.name}</div>${best}
+            <button class="btn" style="width:100%;font-size:10px;height:35px;margin-top:5px;background:${isSel?'#0f0':'#fc0'}" 
+            onclick="${!isLock?'selectItem(\''+key+'\','+i+')':'buyItem(\''+mode+'\','+i+','+item.price+')'}">
+            ${isLock ? 'BUY '+item.price : (isSel?'SELECTED':'SELECT')}</button></div>`;
+    });
+}
+
+function buyItem(m, i, p) { if(saveData.coins >= p){ saveData.coins -= p; if(m==='car') saveData.unlockedCars[i]=true; else saveData.unlockedMaps[i]=true; save(); updateUI(); } }
+function selectItem(k, i) { saveData[k] = i; save(); updateUI(); }
+function showLayer(id) { document.querySelectorAll('.layer').forEach(l => l.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
+
+// --- GAME ENGINE ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let gameActive = false, fuel = 100, groundPoints = [], items = [];
+const car = { x: 200, y: 0, vx: 0, vy: 0, angle: 0, vAngle: 0 };
+const inputs = { gas: false, brake: false, left: false, right: false };
+
+function startGame() {
+    showLayer('game-ui');
+    const m = mapLibrary[saveData.currentMap];
+    document.getElementById('best-dist').innerText = saveData.highScores[saveData.currentMap];
+    groundPoints = []; items = [];
+    for(let i=0; i<5000; i++) {
+        let diff = i > 100 ? 2.8 : (i > 50 ? 1.7 : 1);
+        groundPoints.push({ x: i*100, y: window.innerHeight/1.5 + (Math.sin(i*0.4)*m.bump*diff) + (Math.cos(i*0.1)*30*diff) });
+        if(i > 15 && i % 5 === 0) items.push({x: i*100, type: 'coin'});
+        if(i > 15 && i % 22 === 0) items.push({x: i*100, type: 'fuel'});
+    }
+    car.x = 200; car.y = 100; car.vx = 0; car.vy = 0; car.angle = 0; fuel = 100; gameActive = true;
+    loop();
+}
+
+function loop() {
+    if(!gameActive) return;
+    const c = carLibrary[saveData.currentCar];
+    const m = mapLibrary[saveData.currentMap];
+    const dist = Math.floor(car.x/10);
+
+    const tag = document.getElementById('diff-tag');
+    tag.style.display = 'block';
+    if(dist > 5000) { tag.innerText = "VERY HARD"; tag.style.color = "red"; }
+    else if(dist > 2500) { tag.innerText = "HARD"; tag.style.color = "orange"; }
+    else { tag.innerText = "NORMAL"; tag.style.color = "white"; }
+
+    car.vy += m.grav;
+    if(inputs.gas && fuel > 0) { car.vx += c.power; car.vAngle += 0.008; fuel -= 0.15; }
+    if(inputs.brake) { car.vx -= 0.3; car.vAngle -= 0.008; }
+    if(inputs.left) car.vAngle -= 0.018;
+    if(inputs.right) car.vAngle += 0.018;
+    
+    car.x += car.vx; car.y += car.vy; car.angle += car.vAngle;
+    car.vx *= 0.985; car.vAngle *= 0.93; fuel -= 0.04;
+
+    const gy = getGY(car.x);
+    if(car.y + 15 > gy) {
+        car.vy -= (car.y + 15 - gy) * 0.2;
+        car.y = gy - 15;
+        car.angle += (Math.atan2(getGY(car.x+1)-getGY(car.x-1), 2) - car.angle) * 0.25;
+    }
+
+    if(dist > saveData.highScores[saveData.currentMap]) { saveData.highScores[saveData.currentMap] = dist; save(); }
+
+    items.forEach(it => {
+        if(!it.collected && Math.hypot(car.x-it.x, car.y-(getGY(it.x)-40)) < 50) {
+            it.collected = true;
+            if(it.type==='coin') { saveData.coins += 10; save(); updateUI(); }
+            else fuel = Math.min(100, fuel+50);
+        }
+    });
+
+    if((Math.abs(car.angle) > 2 && car.y + 10 > gy - 10) || fuel <= 0) {
+        gameActive = false; alert("GAME OVER! DIST: " + dist + "m"); location.reload(); return;
+    }
+
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    ctx.fillStyle = m.sky; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.save(); ctx.translate(-car.x + 150, 0);
+    ctx.beginPath(); ctx.moveTo(groundPoints[0].x, groundPoints[0].y);
+    for(let p of groundPoints) ctx.lineTo(p.x, p.y);
+    ctx.lineTo(groundPoints[groundPoints.length-1].x, canvas.height); ctx.lineTo(0, canvas.height);
+    ctx.fillStyle = m.color; ctx.fill();
+    items.forEach(it => { if(!it.collected) { ctx.fillStyle = it.type==='coin'?'#fc0':'#f00'; ctx.beginPath(); ctx.arc(it.x, getGY(it.x)-40, 10, 0, 7); ctx.fill(); }});
+    ctx.translate(car.x, car.y); ctx.rotate(car.angle);
+    ctx.fillStyle = c.color; ctx.fillRect(-c.w/2, -c.h, c.w, c.h);
+    ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(-c.w/3, 0, 15, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(c.w/3, 0, 15, 0, 7); ctx.fill();
+    ctx.restore();
+
+    document.getElementById('fuel-bar').style.width = fuel + "%";
+    document.getElementById('dist').innerText = dist;
+    requestAnimationFrame(loop);
+}
+
+function getGY(x) {
+    const i = Math.floor(x/100);
+    return groundPoints[i].y + (groundPoints[i+1].y - groundPoints[i].y) * ((x % 100)/100);
+}
+
+const b = (id, k) => {
+    const e = document.getElementById(id);
+    e.onpointerdown = (ev) => { ev.preventDefault(); inputs[k] = true; };
+    e.onpointerup = () => inputs[k] = false;
+};
+b('btn-gas', 'gas'); b('btn-brake', 'brake'); b('btn-left', 'left'); b('btn-right', 'right');
+load();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"e3c1c9af36de41759418005494a48906","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STONE PAPER SEASOR - by Muhammad Taqi</title>
+    <style>
+        :root {
+            --bg-dark: #0f0e17;
+            --bg-card: #1a1a2e;
+            --bg-card2: #16213e;
+            --accent: #e94560;
+            --accent2: #4cc9f0;
+            --accent3: #f72585;
+            --gold: #ffd700;
+            --stone: #8b7355;
+            --paper: #e8e8e8;
+            --scissors: #ff6b6b;
+            --text: #ffffff;
+            --text-muted: #b0b0b0;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --glow-accent: 0 0 30px rgba(233, 69, 96, 0.5);
+            --glow-blue: 0 0 30px rgba(76, 201, 240, 0.5);
+            --glow-pink: 0 0 30px rgba(247, 37, 133, 0.5);
+            --glow-gold: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0e17 0%, #1a1a2e 40%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(233, 69, 96, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(76, 201, 240, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(247, 37, 133, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeInUp 0.45s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-8px);
+            }
+            40% {
+                transform: translateX(8px);
+            }
+            60% {
+                transform: translateX(-5px);
+            }
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        @keyframes glowPulse {
+            0%,
+            100% {
+                box-shadow: var(--shadow);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(233, 69, 96, 0.4);
+            }
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes resultPop {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes thinkingDots {
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        /* Card styles */
+        .card {
+            background: rgba(26, 26, 46, 0.9);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        /* Title styles */
+        .game-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1.15;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ffd700, #ff6b6b, #4cc9f0, #f72585);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 6s ease infinite;
+            text-shadow: none;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .game-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .creator-link {
+            display: inline-block;
+            font-size: 0.95rem;
+            color: var(--gold);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .creator-link:hover {
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: var(--glow-gold);
+            transform: translateY(-2px);
+            border-color: rgba(255, 215, 0, 0.6);
+            color: #fff;
+        }
+
+        .creator-link:active {
+            transform: scale(0.96);
+        }
+
+        /* Button styles */
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #4cc9f0, #2a9df4);
+            box-shadow: 0 4px 20px rgba(76, 201, 240, 0.3);
+        }
+        .btn-ai:hover {
+            box-shadow: var(--glow-blue);
+            transform: translateY(-3px);
+        }
+
+        .btn-team {
+            background: linear-gradient(135deg, #f72585, #b5179e);
+            box-shadow: 0 4px 20px rgba(247, 37, 133, 0.3);
+        }
+        .btn-team:hover {
+            box-shadow: var(--glow-pink);
+            transform: translateY(-3px);
+        }
+
+        .btn-easy {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3);
+        }
+        .btn-easy:hover {
+            box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .btn-normal {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.3);
+        }
+        .btn-normal:hover {
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .btn-hard {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+        }
+        .btn-hard:hover {
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            font-size: 0.85rem;
+            padding: 10px 20px;
+            min-width: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 15px;
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+            font-size: 0.8rem;
+            padding: 10px 18px;
+            min-width: auto;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.5px;
+        }
+        .btn-menu:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            min-width: auto;
+            border-radius: 12px;
+        }
+
+        .btn-play-again {
+            background: linear-gradient(135deg, #ffd700, #f9a825);
+            color: #1a1a2e;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+        .btn-play-again:hover {
+            box-shadow: var(--glow-gold);
+            transform: translateY(-3px);
+            color: #fff;
+        }
+
+        /* Choice buttons */
+        .choice-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .choice-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+            font-size: 2.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow);
+        }
+
+        .choice-btn:active {
+            transform: scale(0.92);
+        }
+
+        .choice-btn.stone {
+            border-color: rgba(139, 115, 85, 0.5);
+            background: rgba(139, 115, 85, 0.15);
+        }
+        .choice-btn.stone:hover {
+            border-color: #8b7355;
+            box-shadow: 0 0 25px rgba(139, 115, 85, 0.4);
+        }
+        .choice-btn.stone.selected {
+            border-color: #8b7355;
+            background: rgba(139, 115, 85, 0.35);
+            box-shadow: 0 0 30px rgba(139, 115, 85, 0.5);
+            animation: pulse 0.6s ease;
+        }
+
+        .choice-btn.paper {
+            border-color: rgba(232, 232, 232, 0.5);
+            background: rgba(232, 232, 232, 0.12);
+        }
+        .choice-btn.paper:hover {
+            border-color: #e8e8e8;
+            box-shadow: 0 0 25px rgba(232, 232, 232, 0.35);
+        }
+        .choice-btn.paper.selected {
+            border-color: #e8e8e8;
+            background: rgba(232, 232, 232, 0.3);
+            box-shadow: 0 0 30px rgba(232, 232, 232, 0.45);
+            animation: pulse 0.6s ease;
+        }
+
+        .choice-btn.scissors {
+            border-color: rgba(255, 107, 107, 0.5);
+            background: rgba(255, 107, 107, 0.12);
+        }
+        .choice-btn.scissors:hover {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.4);
+        }
+        .choice-btn.scissors.selected {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.3);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            animation: pulse 0.6s ease;
+        }
+
+        .choice-btn .choice-label {
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* Score display */
+        .score-board {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .score-item {
+            padding: 12px 20px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 80px;
+        }
+
+        .score-item .score-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .score-item .score-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .score-item.player-score .score-value {
+            color: #4cc9f0;
+        }
+        .score-item.ai-score .score-value {
+            color: #ff6b6b;
+        }
+        .score-item.p1-score .score-value {
+            color: #4cc9f0;
+        }
+        .score-item.p2-score .score-value {
+            color: #f72585;
+        }
+        .score-item.tie-score .score-value {
+            color: #ffd700;
+        }
+
+        .score-divider {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* VS indicator */
+        .vs-indicator {
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin: 10px 0;
+            animation: pulse 1.5s ease infinite;
+        }
+
+        /* AI thinking */
+        .ai-thinking {
+            font-size: 2.5rem;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .ai-thinking span {
+            animation: thinkingDots 1s ease infinite;
+            display: inline-block;
+        }
+        .ai-thinking span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .ai-thinking span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Result area */
+        .result-area {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: resultPop 0.5s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-area.win {
+            border-color: rgba(46, 204, 113, 0.5);
+            background: rgba(46, 204, 113, 0.1);
+            box-shadow: 0 0 30px rgba(46, 204, 113, 0.2);
+        }
+        .result-area.lose {
+            border-color: rgba(231, 76, 60, 0.5);
+            background: rgba(231, 76, 60, 0.1);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.2);
+        }
+        .result-area.tie {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(255, 215, 0, 0.08);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .result-area .result-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .result-area.win .result-text {
+            color: #2ecc71;
+        }
+        .result-area.lose .result-text {
+            color: #e74c3c;
+        }
+        .result-area.tie .result-text {
+            color: #ffd700;
+        }
+
+        .result-area .result-detail {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .result-choices-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .result-choice {
+            text-align: center;
+            font-size: 2.8rem;
+            padding: 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            min-width: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .result-choice.winner {
+            border-color: #ffd700;
+            box-shadow: var(--glow-gold);
+            animation: pulse 1s ease infinite;
+            background: rgba(255, 215, 0, 0.12);
+        }
+        .result-choice .rc-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Turn indicator */
+        .turn-indicator {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            background: rgba(76, 201, 240, 0.15);
+            border: 1px solid rgba(76, 201, 240, 0.3);
+            margin: 10px 0;
+            animation: pulse 1.2s ease infinite;
+        }
+        .turn-indicator.p2-turn {
+            background: rgba(247, 37, 133, 0.15);
+            border-color: rgba(247, 37, 133, 0.3);
+        }
+
+        /* Difficulty description */
+        .difficulty-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            display: block;
+            font-weight: 400;
+            margin-top: 4px;
+            text-transform: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card {
+                padding: 25px 18px;
+                border-radius: 18px;
+            }
+            .game-title {
+                font-size: 2rem;
+                letter-spacing: 1px;
+            }
+            .btn {
+                padding: 13px 20px;
+                font-size: 0.9rem;
+                min-width: 160px;
+                border-radius: 12px;
+            }
+            .choice-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 2.2rem;
+                border-radius: 14px;
+            }
+            .choice-btn .choice-label {
+                bottom: -22px;
+                font-size: 0.6rem;
+            }
+            .score-item {
+                padding: 8px 14px;
+                min-width: 60px;
+                border-radius: 10px;
+            }
+            .score-item .score-value {
+                font-size: 1.4rem;
+            }
+            .score-board {
+                gap: 10px;
+            }
+            .result-choice {
+                font-size: 2rem;
+                min-width: 60px;
+            }
+            .choice-buttons {
+                gap: 10px;
+                margin: 15px 0 28px;
+            }
+            .vs-indicator {
+                font-size: 1.1rem;
+            }
+            .result-area .result-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .card {
+                padding: 18px 12px;
+            }
+            .game-title {
+                font-size: 1.6rem;
+            }
+            .btn {
+                padding: 10px 14px;
+                font-size: 0.78rem;
+                min-width: 130px;
+                border-radius: 10px;
+            }
+            .choice-btn {
+                width: 58px;
+                height: 58px;
+                font-size: 1.8rem;
+                border-radius: 12px;
+            }
+            .choice-buttons {
+                gap: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ==================== MAIN MENU ==================== -->
+        <div id="screen-main" class="screen active">
+            <div class="card">
+                <div class="game-subtitle">★ THE CLASSIC GAME ★</div>
+                <h1 class="game-title">Stone<br>Paper<br>Seasor</h1>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:18px;letter-spacing:1px;">
+                    ✊ &nbsp; ✋ &nbsp; ✌️
+                </p>
+                <a href="https://taqi.oneapp.dev" target="_blank" rel="noopener" class="creator-link">
+                    ✨ Created by MUHAMMAD TAQI ✨
+                </a>
+                <div style="display:flex;flex-direction:column;gap:14px;align-items:center;margin-top:10px;">
+                    <button class="btn btn-ai" onclick="showDifficulty()">
+                        🎮 PLAY GAME WITH AI
+                    </button>
+                    <button class="btn btn-team" onclick="startTeamGame()">
+                        👥 PLAY WITH TEAM
+                    </button>
+                </div>
+                <p style="font-size:0.7rem;color:var(--text-muted);margin-top:18px;letter-spacing:0.5px;">
+                    Stone breaks Scissors • Scissors cut Paper • Paper covers Stone
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== DIFFICULTY SCREEN ==================== -->
+        <div id="screen-difficulty" class="screen">
+            <div class="card">
+                <div class="game-subtitle">🎮 AI MODE</div>
+                <h2 style="font-size:1.6rem;font-weight:800;letter-spacing:2px;margin-bottom:20px;text-transform:uppercase;">
+                    Select Difficulty
+                </h2>
+                <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+                    <button class="btn btn-easy" onclick="startAIGame('easy')">
+                        🌱 EASY
+                        <span class="difficulty-desc">AI Genius Na Ho</span>
+                    </button>
+                    <button class="btn btn-normal" onclick="startAIGame('normal')">
+                        ⚡ NORMAL
+                        <span class="difficulty-desc">AI Normal Ho</span>
+                    </button>
+                    <button class="btn btn-hard" onclick="startAIGame('hard')">
+                        🔥 HARD
+                        <span class="difficulty-desc">AI Genius Ho</span>
+                    </button>
+                </div>
+                <button class="btn btn-back" onclick="showMainMenu()">← Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- ==================== AI GAME SCREEN ==================== -->
+        <div id="screen-ai-game" class="screen">
+            <div class="card">
+                <div class="game-subtitle" id="ai-difficulty-label">🎮 AI MODE - EASY</div>
+
+                <!-- Score Board -->
+                <div class="score-board">
+                    <div class="score-item player-score">
+                        <div class="score-label">You</div>
+                        <div class="score-value" id="ai-player-score">0</div>
+                    </div>
+                    <div class="score-divider">:</div>
+                    <div class="score-item tie-score">
+                        <div class="score-label">Ties</div>
+                        <div class="score-value" id="ai-tie-score">0</div>
+                    </div>
+                    <div class="score-divider">:</div>
+                    <div class="score-item ai-score">
+                        <div class="score-label">AI</div>
+                        <div class="score-value" id="ai-ai-score">0</div>
+                    </div>
+                </div>
+
+                <!-- AI Choice Display -->
+                <div id="ai-choice-display" style="min-height:110px;display:flex;align-items:center;justify-content:center;">
+                    <div style="font-size:1rem;color:var(--text-muted);">AI is ready...</div>
+                </div>
+
+                <div class="vs-indicator">⚡ VS ⚡</div>
+
+                <!-- Player Choice Display -->
+                <div id="player-choice-display" style="min-height:60px;display:flex;align-items:center;justify-content:center;">
+                    <div style="font-size:1rem;color:var(--text-muted);">Select your move below</div>
+                </div>
+
+                <!-- Choice Buttons -->
+                <div class="choice-buttons" id="ai-choice-buttons">
+                    <button class="choice-btn stone" onclick="playAIMove('stone')" title="Stone">
+                        ✊
+                        <span class="choice-label">Stone</span>
+                    </button>
+                    <button class="choice-btn paper" onclick="playAIMove('paper')" title="Paper">
+                        ✋
+                        <span class="choice-label">Paper</span>
+                    </button>
+                    <button class="choice-btn scissors" onclick="playAIMove('scissors')" title="Scissors">
+                        ✌️
+                        <span class="choice-label">Scissors</span>
+                    </button>
+                </div>
+
+                <!-- Result Area -->
+                <div id="ai-result-area" class="result-area" style="display:none;">
+                    <div class="result-text" id="ai-result-text"></div>
+                    <div class="result-choices-display" id="ai-result-choices"></div>
+                    <div class="result-detail" id="ai-result-detail"></div>
+                </div>
+
+                <button class="btn btn-menu" onclick="showMainMenu()" style="margin-top:18px;">🏠 Menu</button>
+            </div>
+        </div>
+
+        <!-- ==================== TEAM GAME SCREEN ==================== -->
+        <div id="screen-team-game" class="screen">
+            <div class="card">
+                <div class="game-subtitle">👥 TEAM MODE</div>
+
+                <!-- Score Board -->
+                <div class="score-board">
+                    <div class="score-item p1-score">
+                        <div class="score-label">Player 1</div>
+                        <div class="score-value" id="team-p1-score">0</div>
+                    </div>
+                    <div class="score-divider">:</div>
+                    <div class="score-item tie-score">
+                        <div class="score-label">Ties</div>
+                        <div class="score-value" id="team-tie-score">0</div>
+                    </div>
+                    <div class="score-divider">:</div>
+                    <div class="score-item p2-score">
+                        <div class="score-label">Player 2</div>
+                        <div class="score-value" id="team-p2-score">0</div>
+                    </div>
+                </div>
+
+                <!-- Turn Indicator -->
+                <div id="team-turn-indicator" class="turn-indicator">
+                    🎮 Player 1's Turn
+                </div>
+
+                <!-- Choice Buttons -->
+                <div class="choice-buttons" id="team-choice-buttons" style="margin-top:15px;">
+                    <button class="choice-btn stone" onclick="playTeamMove('stone')" title="Stone">
+                        ✊
+                        <span class="choice-label">Stone</span>
+                    </button>
+                    <button class="choice-btn paper" onclick="playTeamMove('paper')" title="Paper">
+                        ✋
+                        <span class="choice-label">Paper</span>
+                    </button>
+                    <button class="choice-btn scissors" onclick="playTeamMove('scissors')" title="Scissors">
+                        ✌️
+                        <span class="choice-label">Scissors</span>
+                    </button>
+                </div>
+
+                <!-- Result Area -->
+                <div id="team-result-area" class="result-area" style="display:none;">
+                    <div class="result-text" id="team-result-text"></div>
+                    <div class="result-choices-display" id="team-result-choices"></div>
+                    <div class="result-detail" id="team-result-detail"></div>
+                    <button class="btn btn-play-again btn-small" onclick="resetTeamRound()" style="margin-top:14px;">
+                        🔄 Next Round
+                    </button>
+                </div>
+
+                <button class="btn btn-menu" onclick="showMainMenu()" style="margin-top:18px;">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== STATE MANAGEMENT ====================
+        const state = {
+            mode: null, // 'ai' | 'team'
+            difficulty: null, // 'easy' | 'normal' | 'hard'
+            // AI mode scores
+            aiPlayerScore: 0,
+            aiScore: 0,
+            aiTies: 0,
+            // Team mode scores
+            teamP1Score: 0,
+            teamP2Score: 0,
+            teamTies: 0,
+            // Team mode state
+            teamStep: 'player1', // 'player1' | 'player2' | 'result'
+            teamP1Choice: null,
+            teamP2Choice: null,
+            // AI mode state
+            aiPlayerChoice: null,
+            aiChoice: null,
+            aiButtonsLocked: false,
+            // AI model tracking
+            moveHistory: [],
+            transitionMatrix: [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]
+            ],
+            moveCounts: [0, 0, 0],
+            lastUserMove: -1,
+        };
+
+        // Move mapping
+        const MOVE_MAP = {
+            stone: 0,
+            paper: 1,
+            scissors: 2,
+        };
+        const MOVE_EMOJI = ['✊', '✋', '✌️'];
+        const MOVE_NAME = ['Stone', 'Paper', 'Scissors'];
+        const MOVE_EMOJI_MAP = { stone: '✊', paper: '✋', scissors: '✌️' };
+
+        // ==================== SCREEN MANAGEMENT ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screen = document.getElementById(screenId);
+            if (screen) {
+                screen.classList.add('active');
+            }
+        }
+
+        function showMainMenu() {
+            state.mode = null;
+            state.difficulty = null;
+            state.aiPlayerChoice = null;
+            state.aiChoice = null;
+            state.aiButtonsLocked = false;
+            state.teamStep = 'player1';
+            state.teamP1Choice = null;
+            state.teamP2Choice = null;
+            document.getElementById('ai-result-area').style.display = 'none';
+            document.getElementById('team-result-area').style.display = 'none';
+            resetAIChoiceDisplay();
+            resetPlayerChoiceDisplay();
+            showScreen('screen-main');
+        }
+
+        function showDifficulty() {
+            showScreen('screen-difficulty');
+        }
+
+        // ==================== AI MODE ====================
+        function startAIGame(difficulty) {
+            state.mode = 'ai';
+            state.difficulty = difficulty;
+            state.aiPlayerScore = 0;
+            state.aiScore = 0;
+            state.aiTies = 0;
+            state.aiPlayerChoice = null;
+            state.aiChoice = null;
+            state.aiButtonsLocked = false;
+            state.moveHistory = [];
+            state.transitionMatrix = [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]
+            ];
+            state.moveCounts = [0, 0, 0];
+            state.lastUserMove = -1;
+
+            const diffLabel = difficulty === 'easy' ? '🌱 EASY' :
+                difficulty === 'normal' ? '⚡ NORMAL' : '🔥 HARD';
+            document.getElementById('ai-difficulty-label').textContent = `🎮 AI MODE - ${diffLabel}`;
+
+            updateAIScores();
+            resetAIChoiceDisplay();
+            resetPlayerChoiceDisplay();
+            document.getElementById('ai-result-area').style.display = 'none';
+            enableAIButtons(true);
+            showScreen('screen-ai-game');
+        }
+
+        function updateAIScores() {
+            document.getElementById('ai-player-score').textContent = state.aiPlayerScore;
+            document.getElementById('ai-ai-score').textContent = state.aiScore;
+            document.getElementById('ai-tie-score').textContent = state.aiTies;
+        }
+
+        function resetAIChoiceDisplay() {
+            document.getElementById('ai-choice-display').innerHTML =
+                '<div style="font-size:1rem;color:var(--text-muted);">AI is ready...</div>';
+        }
+
+        function resetPlayerChoiceDisplay() {
+            document.getElementById('player-choice-display').innerHTML =
+                '<div style="font-size:1rem;color:var(--text-muted);">Select your move below</div>';
+        }
+
+        function enableAIButtons(enabled) {
+            const buttons = document.querySelectorAll('#ai-choice-buttons .choice-btn');
+            buttons.forEach(btn => {
+                btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '0.5';
+                btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+                btn.classList.remove('selected');
+            });
+            state.aiButtonsLocked = !enabled;
+        }
+
+        function showAIThinking() {
+            document.getElementById('ai-choice-display').innerHTML = `
+                <div class="ai-thinking">
+                    <span>🤖</span>
+                    <span style="font-size:0.8rem;color:var(--text-muted);">thinking</span>
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            `;
+        }
+
+        function playAIMove(playerMove) {
+            if (state.aiButtonsLocked) return;
+            state.aiButtonsLocked = true;
+            state.aiPlayerChoice = playerMove;
+
+            // Highlight selected button
+            document.querySelectorAll('#ai-choice-buttons .choice-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.classList.contains(playerMove)) {
+                    btn.classList.add('selected');
+                }
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+
+            // Show player's choice
+            const playerIdx = MOVE_MAP[playerMove];
+            document.getElementById('player-choice-display').innerHTML = `
+                <div style="text-align:center;">
+                    <span style="font-size:3rem;">${MOVE_EMOJI[playerIdx]}</span>
+                    <div style="font-size:0.8rem;color:var(--text-muted);">${MOVE_NAME[playerIdx]}</div>
+                </div>
+            `;
+
+            // Show AI thinking
+            showAIThinking();
+
+            // Get AI choice after delay
+            const delay = 700 + Math.random() * 600;
+            setTimeout(() => {
+                const aiMove = getAIChoice();
+                state.aiChoice = aiMove;
+                const aiIdx = MOVE_MAP[aiMove];
+
+                // Reveal AI choice
+                document.getElementById('ai-choice-display').innerHTML = `
+                    <div style="text-align:center;animation:resultPop 0.4s ease;">
+                        <span style="font-size:3rem;">${MOVE_EMOJI[aiIdx]}</span>
+                        <div style="font-size:0.8rem;color:var(--text-muted);">AI chose ${MOVE_NAME[aiIdx]}</div>
+                    </div>
+                `;
+
+                // Determine winner
+                const result = determineWinner(playerMove, aiMove);
+                showAIResult(result, playerMove, aiMove);
+
+                // Update AI model
+                updateAIModel(playerIdx);
+
+                // Re-enable buttons after showing result
+                setTimeout(() => {
+                    enableAIButtons(true);
+                    // Reset displays after a moment
+                }, 1200);
+            }, delay);
+        }
+
+        function getAIChoice() {
+            switch (state.difficulty) {
+                case 'easy':
+                    return getEasyAIChoice();
+                case 'normal':
+                    return getNormalAIChoice();
+                case 'hard':
+                    return getHardAIChoice();
+                default:
+                    return getEasyAIChoice();
+            }
+        }
+
+        function getEasyAIChoice() {
+            const r = Math.floor(Math.random() * 3);
+            return ['stone', 'paper', 'scissors'][r];
+        }
+
+        function getNormalAIChoice() {
+            if (Math.random() < 0.45 && state.lastUserMove !== -1) {
+                // Counter the user's last move sometimes
+                const counter = (state.lastUserMove + 1) % 3;
+                return ['stone', 'paper', 'scissors'][counter];
+            }
+            // Also counter most frequent move sometimes
+            if (Math.random() < 0.3 && state.moveCounts.some(c => c > 0)) {
+                const mostFreq = getMostFrequentMoveIndex();
+                const counter = (mostFreq + 1) % 3;
+                return ['stone', 'paper', 'scissors'][counter];
+            }
+            const r = Math.floor(Math.random() * 3);
+            return ['stone', 'paper', 'scissors'][r];
+        }
+
+        function getHardAIChoice() {
+            const predicted = predictUserMove();
+            const counter = (predicted + 1) % 3;
+            return ['stone', 'paper', 'scissors'][counter];
+        }
+
+        function predictUserMove() {
+            if (state.lastUserMove === -1) {
+                return getMostFrequentMoveIndex();
+            }
+            const row = state.transitionMatrix[state.lastUserMove];
+            const total = row[0] + row[1] + row[2];
+            if (total >= 3) {
+                const maxVal = Math.max(row[0], row[1], row[2]);
+                if (row[0] === maxVal) return 0;
+                if (row[1] === maxVal) return 1;
+                return 2;
+            }
+            return getMostFrequentMoveIndex();
+        }
+
+        function getMostFrequentMoveIndex() {
+            const maxVal = Math.max(state.moveCounts[0], state.moveCounts[1], state.moveCounts[2]);
+            if (state.moveCounts[0] === maxVal) return 0;
+            if (state.moveCounts[1] === maxVal) return 1;
+            return 2;
+        }
+
+        function updateAIModel(userMoveIdx) {
+            if (state.lastUserMove !== -1) {
+                state.transitionMatrix[state.lastUserMove][userMoveIdx]++;
+            }
+            state.moveCounts[userMoveIdx]++;
+            state.lastUserMove = userMoveIdx;
+            state.moveHistory.push(userMoveIdx);
+        }
+
+        function determineWinner(move1, move2) {
+            const m1 = MOVE_MAP[move1];
+            const m2 = MOVE_MAP[move2];
+            if (m1 === m2) return 'tie';
+            if ((m1 === 0 && m2 === 2) || // stone beats scissors
+                (m1 === 1 && m2 === 0) || // paper beats stone
+                (m1 === 2 && m2 === 1)) { // scissors beats paper
+                return 'player1';
+            }
+            return 'player2';
+        }
+
+        function getWinDetail(winner, move1, move2) {
+            const m1 = MOVE_MAP[move1];
+            const m2 = MOVE_MAP[move2];
+            if (m1 === 0 && m2 === 2) return 'Stone breaks Scissors';
+            if (m1 === 1 && m2 === 0) return 'Paper covers Stone';
+            if (m1 === 2 && m2 === 1) return 'Scissors cut Paper';
+            if (m2 === 0 && m1 === 2) return 'Stone breaks Scissors';
+            if (m2 === 1 && m1 === 0) return 'Paper covers Stone';
+            if (m2 === 2 && m1 === 1) return 'Scissors cut Paper';
+            return '';
+        }
+
+        function showAIResult(result, playerMove, aiMove) {
+            const area = document.getElementById('ai-result-area');
+            const textEl = document.getElementById('ai-result-text');
+            const choicesEl = document.getElementById('ai-result-choices');
+            const detailEl = document.getElementById('ai-result-detail');
+
+            area.style.display = 'flex';
+            area.classList.remove('win', 'lose', 'tie');
+
+            const pIdx = MOVE_MAP[playerMove];
+            const aIdx = MOVE_MAP[aiMove];
+
+            if (result === 'player1') {
+                area.classList.add('win');
+                textEl.textContent = '🎉 You Win!';
+                state.aiPlayerScore++;
+            } else if (result === 'player2') {
+                area.classList.add('lose');
+                textEl.textContent = '😔 AI Wins!';
+                state.aiScore++;
+            } else {
+                area.classList.add('tie');
+                textEl.textContent = '🤝 Tie! Play Again!';
+                state.aiTies++;
+            }
+
+            detailEl.textContent = result === 'tie' ? 'Same move — go again!' : getWinDetail(result, playerMove, aiMove);
+
+            choicesEl.innerHTML = `
+                <div class="result-choice ${result === 'player1' ? 'winner' : ''}">
+                    ${MOVE_EMOJI[pIdx]}
+                    <div class="rc-label">You (${MOVE_NAME[pIdx]})</div>
+                </div>
+                <span style="font-size:1.5rem;font-weight:900;color:var(--text-muted);">VS</span>
+                <div class="result-choice ${result === 'player2' ? 'winner' : ''}">
+                    ${MOVE_EMOJI[aIdx]}
+                    <div class="rc-label">AI (${MOVE_NAME[aIdx]})</div>
+                </div>
+            `;
+
+            updateAIScores();
+        }
+
+        // ==================== TEAM MODE ====================
+        function startTeamGame() {
+            state.mode = 'team';
+            state.teamP1Score = 0;
+            state.teamP2Score = 0;
+            state.teamTies = 0;
+            state.teamStep = 'player1';
+            state.teamP1Choice = null;
+            state.teamP2Choice = null;
+
+            updateTeamScores();
+            document.getElementById('team-result-area').style.display = 'none';
+            document.getElementById('team-turn-indicator').textContent = '🎮 Player 1\'s Turn';
+            document.getElementById('team-turn-indicator').classList.remove('p2-turn');
+            enableTeamButtons(true);
+            showScreen('screen-team-game');
+        }
+
+        function updateTeamScores() {
+            document.getElementById('team-p1-score').textContent = state.teamP1Score;
+            document.getElementById('team-p2-score').textContent = state.teamP2Score;
+            document.getElementById('team-tie-score').textContent = state.teamTies;
+        }
+
+        function enableTeamButtons(enabled) {
+            const buttons = document.querySelectorAll('#team-choice-buttons .choice-btn');
+            buttons.forEach(btn => {
+                btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '0.5';
+                btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+                btn.classList.remove('selected');
+            });
+        }
+
+        function playTeamMove(move) {
+            if (state.teamStep === 'result') return;
+
+            if (state.teamStep === 'player1') {
+                state.teamP1Choice = move;
+                // Highlight selected
+                document.querySelectorAll('#team-choice-buttons .choice-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.classList.contains(move)) {
+                        btn.classList.add('selected');
+                    }
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                });
+                // Transition to Player 2
+                state.teamStep = 'player2';
+                document.getElementById('team-turn-indicator').textContent = '🎮 Player 2\'s Turn';
+                document.getElementById('team-turn-indicator').classList.add('p2-turn');
+                // Reset buttons for player 2
+                setTimeout(() => {
+                    enableTeamButtons(true);
+                }, 500);
+            } else if (state.teamStep === 'player2') {
+                state.teamP2Choice = move;
+                state.teamStep = 'result';
+                document.getElementById('team-turn-indicator').textContent = '⚡ Result';
+                // Highlight selected
+                document.querySelectorAll('#team-choice-buttons .choice-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.classList.contains(move)) {
+                        btn.classList.add('selected');
+                    }
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                });
+                // Show result
+                const result = determineWinner(state.teamP1Choice, state.teamP2Choice);
+                showTeamResult(result);
+            }
+        }
+
+        function showTeamResult(result) {
+            const area = document.getElementById('team-result-area');
+            const textEl = document.getElementById('team-result-text');
+            const choicesEl = document.getElementById('team-result-choices');
+            const detailEl = document.getElementById('team-result-detail');
+
+            area.style.display = 'flex';
+            area.classList.remove('win', 'lose', 'tie');
+
+            const p1Idx = MOVE_MAP[state.teamP1Choice];
+            const p2Idx = MOVE_MAP[state.teamP2Choice];
+
+            if (result === 'player1') {
+                area.classList.add('win');
+                textEl.textContent = '🏆 Player 1 Wins!';
+                state.teamP1Score++;
+            } else if (result === 'player2') {
+                area.classList.add('win');
+                textEl.textContent = '🏆 Player 2 Wins!';
+                state.teamP2Score++;
+            } else {
+                area.classList.add('tie');
+                textEl.textContent = '🤝 Tie! Play Again!';
+                state.teamTies++;
+            }
+
+            detailEl.textContent = result === 'tie' ? 'Same move — go again!' : getWinDetail(result, state.teamP1Choice, state
+                .teamP2Choice);
+
+            choicesEl.innerHTML = `
+                <div class="result-choice ${result === 'player1' ? 'winner' : ''}">
+                    ${MOVE_EMOJI[p1Idx]}
+                    <div class="rc-label">P1 (${MOVE_NAME[p1Idx]})</div>
+                </div>
+                <span style="font-size:1.5rem;font-weight:900;color:var(--text-muted);">VS</span>
+                <div class="result-choice ${result === 'player2' ? 'winner' : ''}">
+                    ${MOVE_EMOJI[p2Idx]}
+                    <div class="rc-label">P2 (${MOVE_NAME[p2Idx]})</div>
+                </div>
+            `;
+
+            updateTeamScores();
+        }
+
+        function resetTeamRound() {
+            state.teamStep = 'player1';
+            state.teamP1Choice = null;
+            state.teamP2Choice = null;
+            document.getElementById('team-result-area').style.display = 'none';
+            document.getElementById('team-turn-indicator').textContent = '🎮 Player 1\'s Turn';
+            document.getElementById('team-turn-indicator').classList.remove('p2-turn');
+            enableTeamButtons(true);
+        }
+
+        // ==================== INITIALIZATION ====================
+        // Show main menu by default
+        showMainMenu();
+
+        // Keyboard shortcuts (1=Stone, 2=Paper, 3=Scissors)
+        document.addEventListener('keydown', function(e) {
+            const activeScreen = document.querySelector('.screen.active');
+            if (!activeScreen) return;
+
+            if (activeScreen.id === 'screen-ai-game' && !state.aiButtonsLocked) {
+                if (e.key === '1') playAIMove('stone');
+                if (e.key === '2') playAIMove('paper');
+                if (e.key === '3') playAIMove('scissors');
+            }
+            if (activeScreen.id === 'screen-team-game') {
+                if (e.key === '1') playTeamMove('stone');
+                if (e.key === '2') playTeamMove('paper');
+                if (e.key === '3') playTeamMove('scissors');
+            }
+        });
+    </script>
+</body>
+</html>

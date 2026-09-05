@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stickman Sniper / Sharpshooter - Muhammad Taqi</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            touch-action: manipulation;
+        }
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #16213e 0%, #0f0f1f 100%);
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            text-align: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .screen.active {
+            display: flex;
+        }
+        .title {
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-weight: bold;
+            text-shadow: 0 0 20px #ff6b6b;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .creator {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        .coin-display {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            background: rgba(255, 215, 0, 0.15);
+            padding: 8px 20px;
+            border-radius: 25px;
+            border: 1px solid #ffd700;
+            margin-bottom: 20px;
+            white-space: nowrap;
+        }
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            border: none;
+            padding: clamp(12px, 3vw, 16px) clamp(20px, 5vw, 32px);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 8px;
+            min-width: clamp(160px, 50vw, 220px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+        }
+        .btn.secondary {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+        .btn.gold {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            box-shadow: 0 5px 15px rgba(246, 211, 101, 0.3);
+            color: #333;
+        }
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            max-width: 900px;
+            max-height: 65vh;
+            max-height: 65dvh;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            margin: 12px 0;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 480px) {
+            .store-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+                padding: 8px;
+                max-height: 60vh;
+                max-height: 60dvh;
+            }
+        }
+        @media (min-width: 768px) {
+            .store-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+        .store-item {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            touch-action: manipulation;
+        }
+        .store-item:active {
+            transform: scale(0.97);
+        }
+        .store-item.equipped {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .store-item .item-name {
+            font-size: clamp(0.75rem, 2vw, 0.9rem);
+            font-weight: bold;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .store-item .item-price {
+            font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+            color: #ffd700;
+            margin-bottom: 7px;
+            word-break: break-word;
+        }
+        .store-item button {
+            background: #ff6b6b;
+            color: #fff;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+            transition: background 0.3s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .store-item button:active {
+            transform: scale(0.9);
+        }
+        .store-item button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .store-item button.equip {
+            background: #4caf50;
+        }
+        #gameCanvas {
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: crosshair;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            background: #87ceeb;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            display: block;
+        }
+        .game-ui {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-ui canvas {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            max-height: 70dvh;
+            object-fit: contain;
+        }
+        .ammo-display {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            z-index: 5;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .stage-display {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            z-index: 5;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .result-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: clamp(20px, 5vw, 30px);
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 10;
+            width: 85%;
+            max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        }
+        .result-overlay.show {
+            display: block;
+        }
+        .result-overlay h2 {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+        .result-overlay p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        .result-overlay .btn {
+            min-width: 120px;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            padding: 10px 18px;
+            margin: 5px;
+        }
+        .password-box {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+            color: #ffd700;
+            font-size: clamp(0.8rem, 2vw, 0.95rem);
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 15px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1e2a3a;
+            padding: clamp(18px, 4vw, 25px);
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .stage-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(50px, 12vw, 65px), 1fr));
+            gap: 8px;
+            max-width: 700px;
+            max-height: 60vh;
+            max-height: 60dvh;
+            overflow-y: auto;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            margin: 12px 0;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .stage-btn {
+            background: #4facfe;
+            color: #fff;
+            border: none;
+            padding: clamp(8px, 2.5vw, 10px);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stage-btn:active {
+            transform: scale(0.9);
+        }
+        .stage-btn.locked {
+            background: #444;
+            cursor: not-allowed;
+        }
+        .stage-btn.completed {
+            background: #4caf50;
+        }
+        .name-input {
+            padding: clamp(10px, 3vw, 14px) clamp(16px, 4vw, 20px);
+            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+            border-radius: 30px;
+            border: 2px solid #4facfe;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            outline: none;
+            text-align: center;
+            width: 85%;
+            max-width: 400px;
+            margin: 15px 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .name-input::placeholder {
+            color: #aaa;
+        }
+        .rename-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            z-index: 50;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .rename-btn:active {
+            background: rgba(255, 107, 107, 0.7);
+            border-color: #ff6b6b;
+            transform: scale(0.95);
+        }
+        .back-btn-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        h2 {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            margin-bottom: 8px;
+        }
+        @media (max-width: 480px) {
+            .screen {
+                padding: 10px;
+            }
+            .btn {
+                min-width: 140px;
+                margin: 6px;
+                padding: 12px 18px;
+            }
+            .game-ui canvas {
+                max-height: 55vh;
+                max-height: 55dvh;
+            }
+            .result-overlay .btn {
+                min-width: 100px;
+                font-size: 0.85rem;
+                padding: 8px 14px;
+                margin: 4px;
+            }
+            .rename-btn {
+                top: 8px;
+                left: 8px;
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 768px) {
+            .screen {
+                padding: 20px;
+            }
+            .btn {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- NAME ENTRY SCREEN -->
+        <div id="nameScreen" class="screen">
+            <div class="title" style="font-size:clamp(1.8rem,5vw,2.4rem); margin-bottom:15px;">Enter Your Name</div>
+            <input type="text" id="usernameInput" class="name-input" placeholder="Your name here..." maxlength="20" autocomplete="off">
+            <button class="btn" onclick="saveUsername()">Continue</button>
+        </div>
+
+        <!-- HOME SCREEN -->
+        <div id="homeScreen" class="screen">
+            <button class="rename-btn" onclick="showNameScreen()">✏️ Rename</button>
+            <div class="title">Stickman Sniper</div>
+            <div class="creator">Created by Muhammad Taqi</div>
+            <div class="coin-display" id="coinDisplayHome">🪙 0</div>
+            <button class="btn" onclick="showScreen('stageSelect')">🎯 Play Game</button>
+            <button class="btn secondary" onclick="showScreen('characterStore')">👤 Character Store</button>
+            <button class="btn secondary" onclick="showScreen('sniperStore')">🔫 Sniper Store</button>
+            <button class="btn gold" onclick="openExternal()">🌐 Open Website</button>
+            <button class="btn gold" onclick="openIframe()">🖥️ Full Page (iframe)</button>
+        </div>
+
+        <!-- CHARACTER STORE -->
+        <div id="characterStore" class="screen">
+            <h2>👤 Character Store</h2>
+            <div class="coin-display" id="coinDisplayChar">🪙 0</div>
+            <div class="store-grid" id="characterGrid"></div>
+            <div class="back-btn-container">
+                <button class="btn secondary" onclick="showScreen('homeScreen')">⬅️ Back</button>
+            </div>
+        </div>
+
+        <!-- SNIPER STORE -->
+        <div id="sniperStore" class="screen">
+            <h2>🔫 Sniper Store</h2>
+            <div class="coin-display" id="coinDisplaySniper">🪙 0</div>
+            <div class="store-grid" id="sniperGrid"></div>
+            <div class="back-btn-container">
+                <button class="btn secondary" onclick="showScreen('homeScreen')">⬅️ Back</button>
+            </div>
+        </div>
+
+        <!-- STAGE SELECT -->
+        <div id="stageSelect" class="screen">
+            <h2>🎯 Select Stage</h2>
+            <div class="stage-select" id="stageGrid"></div>
+            <div class="back-btn-container">
+                <button class="btn secondary" onclick="showScreen('homeScreen')">⬅️ Back</button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="gameScreen" class="screen">
+            <div class="game-ui">
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
+                <div class="stage-display" id="stageDisplay">Stage: 1</div>
+                <div class="ammo-display" id="ammoDisplay">Ammo: 3</div>
+                <div class="result-overlay" id="resultOverlay">
+                    <h2 id="resultTitle"></h2>
+                    <p id="resultCoins"></p>
+                    <button class="btn" onclick="replayStage()">🔄 Replay</button>
+                    <button class="btn secondary" id="nextStageBtn" onclick="nextStage()">➡️ Next Stage</button>
+                    <button class="btn gold" onclick="exitToMenu()">🏠 Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL for password -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>✅ Purchase Successful!</h3>
+            <p>Your generated password:</p>
+            <div class="password-box" id="generatedPassword"></div>
+            <button class="btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        const CHARACTERS = [];
+        const SNIPERS = [];
+        for (let i = 1; i <= 50; i++) {
+            let price = 500 + (i - 1) * 500;
+            CHARACTERS.push({ id: i, name: `Character ${i}`, price: price });
+            let zoom = 1 + (i - 1) * 0.02;
+            SNIPERS.push({ id: i, name: `Sniper ${i}`, price: price, zoom: zoom });
+        }
+
+        // ==================== STATE ====================
+        let coins = parseInt(localStorage.getItem('sniper_coins') || '500');
+        let ownedCharacters = JSON.parse(localStorage.getItem('sniper_ownedChars') || '[1]');
+        let ownedSnipers = JSON.parse(localStorage.getItem('sniper_ownedSnipers') || '[1]');
+        let equippedCharacter = parseInt(localStorage.getItem('sniper_equipChar') || '1');
+        let equippedSniper = parseInt(localStorage.getItem('sniper_equipSniper') || '1');
+        let unlockedStage = parseInt(localStorage.getItem('sniper_unlockedStage') || '1');
+        let username = localStorage.getItem('sniper_username') || '';
+
+        let currentStage = 1;
+        let ammo = 3;
+        let stickmen = [];
+        let gameActive = false;
+        let offscreenCanvas = document.createElement('canvas');
+        let offscreenCtx = offscreenCanvas.getContext('2d');
+        let mouseX = 400,
+            mouseY = 250;
+        let scopeRadius = 70;
+        let isMobile = false;
+
+        // ==================== MOBILE DETECTION ====================
+        function detectMobile() {
+            isMobile = window.innerWidth <= 768 || 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            scopeRadius = isMobile ? Math.min(60, window.innerWidth * 0.1) : 80;
+        }
+        detectMobile();
+        window.addEventListener('resize', () => {
+            detectMobile();
+        });
+
+        // ==================== DOM REFS ====================
+        const homeScreen = document.getElementById('homeScreen');
+        const nameScreen = document.getElementById('nameScreen');
+        const characterStore = document.getElementById('characterStore');
+        const sniperStore = document.getElementById('sniperStore');
+        const stageSelect = document.getElementById('stageSelect');
+        const gameScreen = document.getElementById('gameScreen');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const coinDisplayHome = document.getElementById('coinDisplayHome');
+        const coinDisplayChar = document.getElementById('coinDisplayChar');
+        const coinDisplaySniper = document.getElementById('coinDisplaySniper');
+        const characterGrid = document.getElementById('characterGrid');
+        const sniperGrid = document.getElementById('sniperGrid');
+        const stageGrid = document.getElementById('stageGrid');
+        const stageDisplay = document.getElementById('stageDisplay');
+        const ammoDisplay = document.getElementById('ammoDisplay');
+        const resultOverlay = document.getElementById('resultOverlay');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultCoins = document.getElementById('resultCoins');
+        const nextStageBtn = document.getElementById('nextStageBtn');
+        const passwordModal = document.getElementById('passwordModal');
+        const generatedPassword = document.getElementById('generatedPassword');
+        const usernameInput = document.getElementById('usernameInput');
+
+        // ==================== UTILS ====================
+        function saveState() {
+            localStorage.setItem('sniper_coins', coins);
+            localStorage.setItem('sniper_ownedChars', JSON.stringify(ownedCharacters));
+            localStorage.setItem('sniper_ownedSnipers', JSON.stringify(ownedSnipers));
+            localStorage.setItem('sniper_equipChar', equippedCharacter);
+            localStorage.setItem('sniper_equipSniper', equippedSniper);
+            localStorage.setItem('sniper_unlockedStage', unlockedStage);
+            localStorage.setItem('sniper_username', username);
+        }
+
+        function updateCoinDisplays() {
+            const text = `🪙 ${coins}`;
+            if (coinDisplayHome) coinDisplayHome.textContent = text;
+            if (coinDisplayChar) coinDisplayChar.textContent = text;
+            if (coinDisplaySniper) coinDisplaySniper.textContent = text;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screen = document.getElementById(screenId);
+            if (screen) screen.classList.add('active');
+            if (screenId === 'characterStore') renderCharacterStore();
+            if (screenId === 'sniperStore') renderSniperStore();
+            if (screenId === 'stageSelect') renderStageSelect();
+            updateCoinDisplays();
+        }
+
+        function generatePassword(itemType, itemName, itemNumber) {
+            const usernameLength = username.length;
+            return `${username}MT${usernameLength}${itemName}${itemNumber}`;
+        }
+
+        function closeModal() {
+            passwordModal.classList.remove('active');
+        }
+
+        function openExternal() {
+            window.open('https://nexura.oneapp.dev/', '_blank');
+        }
+
+        function openIframe() {
+            const modal = document.createElement('div');
+            modal.style.cssText =
+                'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:200;';
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://muhammad-taqi512-lyra.hf.space';
+            iframe.style.cssText = 'width:100%;height:100%;border:none;';
+            modal.appendChild(iframe);
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '✕ Close';
+            closeBtn.style.cssText =
+                'position:absolute;top:10px;right:10px;background:red;color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:1rem;z-index:210;touch-action:manipulation;';
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            modal.appendChild(closeBtn);
+            document.body.appendChild(modal);
+        }
+
+        // ==================== USERNAME HANDLING ====================
+        function showNameScreen() {
+            usernameInput.value = username || '';
+            showScreen('nameScreen');
+            setTimeout(() => usernameInput.focus(), 100);
+        }
+
+        function saveUsername() {
+            const newName = usernameInput.value.trim();
+            if (newName) {
+                username = newName;
+                localStorage.setItem('sniper_username', username);
+                showScreen('homeScreen');
+            } else {
+                alert('Please enter a name!');
+            }
+        }
+
+        // ==================== STORE RENDERING ====================
+        function renderCharacterStore() {
+            if (!characterGrid) return;
+            characterGrid.innerHTML = '';
+            CHARACTERS.forEach(char => {
+                const div = document.createElement('div');
+                div.className = 'store-item';
+                if (equippedCharacter === char.id) div.classList.add('equipped');
+                const owned = ownedCharacters.includes(char.id);
+                div.innerHTML = `
+              <div class="item-name">${char.name}</div>
+              <div class="item-price">${owned ? '✅ Owned' : `🪙 ${char.price}`}</div>
+              ${owned ?
+                `<button class="equip" onclick="equipCharacter(${char.id})">${equippedCharacter === char.id ? 'Equipped' : 'Equip'}</button>` :
+                `<button onclick="buyCharacter(${char.id})">Buy</button>`
+              }
+            `;
+                characterGrid.appendChild(div);
+            });
+        }
+
+        function renderSniperStore() {
+            if (!sniperGrid) return;
+            sniperGrid.innerHTML = '';
+            SNIPERS.forEach(sniper => {
+                const div = document.createElement('div');
+                div.className = 'store-item';
+                if (equippedSniper === sniper.id) div.classList.add('equipped');
+                const owned = ownedSnipers.includes(sniper.id);
+                div.innerHTML = `
+              <div class="item-name">${sniper.name}</div>
+              <div class="item-price">Zoom: ${sniper.zoom.toFixed(2)}x | ${owned ? '✅ Owned' : `🪙 ${sniper.price}`}</div>
+              ${owned ?
+                `<button class="equip" onclick="equipSniper(${sniper.id})">${equippedSniper === sniper.id ? 'Equipped' : 'Equip'}</button>` :
+                `<button onclick="buySniper(${sniper.id})">Buy</button>`
+              }
+            `;
+                sniperGrid.appendChild(div);
+            });
+        }
+
+        function equipCharacter(id) {
+            if (!ownedCharacters.includes(id)) return;
+            equippedCharacter = id;
+            saveState();
+            renderCharacterStore();
+            updateCoinDisplays();
+        }
+
+        function equipSniper(id) {
+            if (!ownedSnipers.includes(id)) return;
+            equippedSniper = id;
+            saveState();
+            renderSniperStore();
+            updateCoinDisplays();
+        }
+
+        function buyCharacter(id) {
+            const char = CHARACTERS.find(c => c.id === id);
+            if (!char || ownedCharacters.includes(id)) return;
+            if (coins < char.price) {
+                alert('Not enough coins!');
+                return;
+            }
+            coins -= char.price;
+            ownedCharacters.push(id);
+            saveState();
+            updateCoinDisplays();
+            renderCharacterStore();
+            const pwd = generatePassword('character', char.name, id);
+            generatedPassword.textContent = pwd;
+            passwordModal.classList.add('active');
+        }
+
+        function buySniper(id) {
+            const sniper = SNIPERS.find(s => s.id === id);
+            if (!sniper || ownedSnipers.includes(id)) return;
+            if (coins < sniper.price) {
+                alert('Not enough coins!');
+                return;
+            }
+            coins -= sniper.price;
+            ownedSnipers.push(id);
+            saveState();
+            updateCoinDisplays();
+            renderSniperStore();
+            const pwd = generatePassword('sniper', sniper.name, id);
+            generatedPassword.textContent = pwd;
+            passwordModal.classList.add('active');
+        }
+
+        // ==================== STAGE SELECT ====================
+        function renderStageSelect() {
+            if (!stageGrid) return;
+            stageGrid.innerHTML = '';
+            for (let i = 1; i <= 200; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'stage-btn';
+                if (i < unlockedStage) btn.classList.add('completed');
+                if (i > unlockedStage) btn.classList.add('locked');
+                btn.textContent = i;
+                if (i <= unlockedStage) {
+                    btn.addEventListener('click', () => startStage(i));
+                    btn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        startStage(i);
+                    });
+                }
+                stageGrid.appendChild(btn);
+            }
+        }
+
+        function startStage(stage) {
+            currentStage = stage;
+            ammo = 3;
+            gameActive = true;
+            resultOverlay.classList.remove('show');
+            resultOverlay.style.display = 'none';
+            showScreen('gameScreen');
+            generateStage(stage);
+            updateGameUI();
+            renderOffscreen();
+            gameLoop();
+        }
+
+        function replayStage() {
+            resultOverlay.classList.remove('show');
+            resultOverlay.style.display = 'none';
+            startStage(currentStage);
+        }
+
+        function nextStage() {
+            if (currentStage < 200) {
+                resultOverlay.classList.remove('show');
+                resultOverlay.style.display = 'none';
+                startStage(currentStage + 1);
+            } else {
+                alert('You have completed all stages!');
+                showScreen('stageSelect');
+            }
+        }
+
+        function exitToMenu() {
+            gameActive = false;
+            resultOverlay.classList.remove('show');
+            resultOverlay.style.display = 'none';
+            showScreen('stageSelect');
+        }
+
+        // ==================== GAME LOGIC ====================
+        function generateStage(stage) {
+            stickmen = [];
+            const blackCount = stage;
+            const total = blackCount + 1;
+            const positions = getAllWindowPositions();
+            for (let i = positions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [positions[i], positions[j]] = [positions[j], positions[i]];
+            }
+            if (positions.length < total) {
+                for (let i = 0; i < total; i++) {
+                    positions.push({ x: 100 + Math.random() * 600, y: 200 + Math.random() * 200 });
+                }
+            }
+            for (let i = 0; i < blackCount; i++) {
+                stickmen.push({ x: positions[i].x, y: positions[i].y, color: 'black', type: 'black' });
+            }
+            stickmen.push({ x: positions[blackCount].x, y: positions[blackCount].y, color: 'red',
+            type: 'red' });
+        }
+
+        function getAllWindowPositions() {
+            const positions = [];
+            const buildings = getBuildings();
+            buildings.forEach(b => {
+                for (let floor = 0; floor < b.floors; floor++) {
+                    for (let w = 0; w < b.windowsPerFloor; w++) {
+                        const wx = b.x + b.windowMargin + w * (b.windowWidth + b.windowSpacing);
+                        const wy = b.y + b.roofHeight + floor * (b.windowHeight + b.floorSpacing);
+                        positions.push({ x: wx + b.windowWidth / 2, y: wy + b.windowHeight / 2 });
+                    }
+                }
+            });
+            return positions;
+        }
+
+        function getBuildings() {
+            return [
+                { x: 30, y: 80, width: 130, floors: 12, windowsPerFloor: 3, windowWidth: 20, windowHeight: 25,
+                    windowSpacing: 10, windowMargin: 10, roofHeight: 20, floorSpacing: 35 },
+                { x: 170, y: 50, width: 140, floors: 14, windowsPerFloor: 3, windowWidth: 20, windowHeight: 25,
+                    windowSpacing: 10, windowMargin: 10, roofHeight: 20, floorSpacing: 35 },
+                { x: 320, y: 100, width: 120, floors: 10, windowsPerFloor: 3, windowWidth: 20, windowHeight: 25,
+                    windowSpacing: 10, windowMargin: 10, roofHeight: 20, floorSpacing: 35 },
+                { x: 450, y: 60, width: 150, floors: 13, windowsPerFloor: 3, windowWidth: 20, windowHeight: 25,
+                    windowSpacing: 10, windowMargin: 10, roofHeight: 20, floorSpacing: 35 },
+                { x: 610, y: 90, width: 130, floors: 11, windowsPerFloor: 3, windowWidth: 20, windowHeight: 25,
+                    windowSpacing: 10, windowMargin: 10, roofHeight: 20, floorSpacing: 35 },
+            ];
+        }
+
+        function renderOffscreen() {
+            offscreenCanvas.width = canvas.width;
+            offscreenCanvas.height = canvas.height;
+            const ctx2 = offscreenCtx;
+            const skyGrad = ctx2.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#87ceeb');
+            skyGrad.addColorStop(0.7, '#b0e0e6');
+            skyGrad.addColorStop(1, '#f0e68c');
+            ctx2.fillStyle = skyGrad;
+            ctx2.fillRect(0, 0, canvas.width, canvas.height);
+            ctx2.fillStyle = '#ffd700';
+            ctx2.beginPath();
+            ctx2.arc(700, 80, 40, 0, Math.PI * 2);
+            ctx2.fill();
+            const buildings = getBuildings();
+            buildings.forEach(b => {
+                ctx2.fillStyle = '#4a4a5a';
+                ctx2.fillRect(b.x, b.y, b.width, canvas.height - b.y);
+                ctx2.fillStyle = '#5a5a6a';
+                ctx2.fillRect(b.x - 5, b.y - 10, b.width + 10, 15);
+                for (let floor = 0; floor < b.floors; floor++) {
+                    for (let w = 0; w < b.windowsPerFloor; w++) {
+                        const wx = b.x + b.windowMargin + w * (b.windowWidth + b.windowSpacing);
+                        const wy = b.y + b.roofHeight + floor * (b.windowHeight + b.floorSpacing);
+                        ctx2.fillStyle = '#2c3e50';
+                        ctx2.fillRect(wx, wy, b.windowWidth, b.windowHeight);
+                        ctx2.fillStyle = 'rgba(255,255,150,0.3)';
+                        ctx2.fillRect(wx + 2, wy + 2, b.windowWidth - 4, b.windowHeight - 4);
+                        ctx2.strokeStyle = '#666';
+                        ctx2.lineWidth = 1;
+                        ctx2.strokeRect(wx, wy, b.windowWidth, b.windowHeight);
+                    }
+                }
+            });
+            stickmen.forEach(sm => {
+                drawStickman(ctx2, sm.x, sm.y, sm.color);
+            });
+        }
+
+        function drawStickman(ctx2, x, y, color) {
+            ctx2.save();
+            ctx2.translate(x, y);
+            ctx2.fillStyle = color;
+            ctx2.beginPath();
+            ctx2.arc(0, -18, 8, 0, Math.PI * 2);
+            ctx2.fill();
+            ctx2.strokeStyle = color;
+            ctx2.lineWidth = 2;
+            ctx2.beginPath();
+            ctx2.moveTo(0, -10);
+            ctx2.lineTo(0, 10);
+            ctx2.moveTo(0, -5);
+            ctx2.lineTo(-8, 5);
+            ctx2.moveTo(0, -5);
+            ctx2.lineTo(8, 5);
+            ctx2.moveTo(0, 10);
+            ctx2.lineTo(-7, 22);
+            ctx2.moveTo(0, 10);
+            ctx2.lineTo(7, 22);
+            ctx2.stroke();
+            if (color === 'red') {
+                ctx2.fillStyle = '#fff';
+                ctx2.beginPath();
+                ctx2.arc(-3, -20, 2, 0, Math.PI * 2);
+                ctx2.arc(3, -20, 2, 0, Math.PI * 2);
+                ctx2.fill();
+                ctx2.fillStyle = '#000';
+                ctx2.beginPath();
+                ctx2.arc(-3, -20, 1, 0, Math.PI * 2);
+                ctx2.arc(3, -20, 1, 0, Math.PI * 2);
+                ctx2.fill();
+            }
+            ctx2.restore();
+        }
+
+        function updateGameUI() {
+            stageDisplay.textContent = `Stage: ${currentStage}`;
+            ammoDisplay.textContent = `Ammo: ${ammo}`;
+        }
+
+        // ==================== GAME LOOP ====================
+        function gameLoop() {
+            if (!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(offscreenCanvas, 0, 0);
+            const sniper = SNIPERS.find(s => s.id === equippedSniper);
+            const zoom = sniper ? sniper.zoom : 1;
+            drawScope(zoom);
+            requestAnimationFrame(gameLoop);
+        }
+
+        function drawScope(zoom) {
+            const radius = scopeRadius;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+            ctx.clip();
+            const srcSize = radius / zoom;
+            const srcX = Math.max(0, Math.min(canvas.width - srcSize, mouseX - srcSize / 2));
+            const srcY = Math.max(0, Math.min(canvas.height - srcSize, mouseY - srcSize / 2));
+            ctx.drawImage(offscreenCanvas, srcX, srcY, srcSize, srcSize,
+                mouseX - radius, mouseY - radius, radius * 2, radius * 2);
+            ctx.restore();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, radius - 2, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,0,0,0.8)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(mouseX - radius, mouseY);
+            ctx.lineTo(mouseX + radius, mouseY);
+            ctx.moveTo(mouseX, mouseY - radius);
+            ctx.lineTo(mouseX, mouseY + radius);
+            ctx.stroke();
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ==================== INPUT HANDLING ====================
+        function getCanvasCoords(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function handlePointerMove(clientX, clientY) {
+            if (!gameActive) return;
+            const coords = getCanvasCoords(clientX, clientY);
+            mouseX = Math.max(0, Math.min(canvas.width, coords.x));
+            mouseY = Math.max(0, Math.min(canvas.height, coords.y));
+        }
+
+        function handlePointerTap(clientX, clientY) {
+            if (!gameActive) return;
+            if (ammo <= 0) return;
+            const coords = getCanvasCoords(clientX, clientY);
+            mouseX = Math.max(0, Math.min(canvas.width, coords.x));
+            mouseY = Math.max(0, Math.min(canvas.height, coords.y));
+            ammo--;
+            updateGameUI();
+            let hitRed = false;
+            let hitBlack = false;
+            const hitRadius = isMobile ? Math.max(25, scopeRadius * 0.45) : 30;
+            stickmen.forEach(sm => {
+                const dx = sm.x - mouseX;
+                const dy = sm.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < hitRadius) {
+                    if (sm.type === 'red') hitRed = true;
+                    else hitBlack = true;
+                }
+            });
+            if (hitRed) {
+                gameActive = false;
+                coins += 500;
+                if (currentStage >= unlockedStage) unlockedStage = Math.min(200, currentStage + 1);
+                saveState();
+                updateCoinDisplays();
+                resultTitle.textContent = '🎉 You Win!';
+                resultCoins.textContent = '+500 Coins';
+                nextStageBtn.style.display = currentStage < 200 ? 'inline-block' : 'none';
+                resultOverlay.style.display = 'block';
+                resultOverlay.classList.add('show');
+            } else if (hitBlack) {
+                gameActive = false;
+                coins += 100;
+                saveState();
+                updateCoinDisplays();
+                resultTitle.textContent = '❌ Wrong Target! You shot a black stickman!';
+                resultCoins.textContent = '+100 Coins (consolation)';
+                nextStageBtn.style.display = 'none';
+                resultOverlay.style.display = 'block';
+                resultOverlay.classList.add('show');
+            } else if (ammo <= 0) {
+                gameActive = false;
+                coins += 100;
+                saveState();
+                updateCoinDisplays();
+                resultTitle.textContent = '❌ Out of Ammo!';
+                resultCoins.textContent = '+100 Coins (consolation)';
+                nextStageBtn.style.display = 'none';
+                resultOverlay.style.display = 'block';
+                resultOverlay.classList.add('show');
+            }
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousemove', (e) => {
+            handlePointerMove(e.clientX, e.clientY);
+        });
+        canvas.addEventListener('click', (e) => {
+            handlePointerTap(e.clientX, e.clientY);
+        });
+        canvas.addEventListener('mouseleave', () => {
+            // Keep last position, nothing needed
+        });
+
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (touch) {
+                handlePointerMove(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            if (touch) {
+                handlePointerMove(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            if (touch) {
+                handlePointerTap(touch.clientX, touch.clientY);
+            }
+        }, { passive: false });
+
+        // Also handle tap on the canvas container area for mobile
+        document.addEventListener('touchmove', (e) => {
+            if (gameActive && e.target === canvas) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Keyboard support for desktop
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            const step = 5;
+            if (e.key === 'ArrowLeft') mouseX = Math.max(0, mouseX - step);
+            if (e.key === 'ArrowRight') mouseX = Math.min(canvas.width, mouseX + step);
+            if (e.key === 'ArrowUp') mouseY = Math.max(0, mouseY - step);
+            if (e.key === 'ArrowDown') mouseY = Math.min(canvas.height, mouseY + step);
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                handlePointerTap(mouseX, mouseY);
+            }
+        });
+
+        // ==================== INIT ====================
+        function init() {
+            updateCoinDisplays();
+            renderCharacterStore();
+            renderSniperStore();
+            renderStageSelect();
+
+            // Add touch event listeners for all buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('touchend', (e) => {
+                    // Prevent double-firing with click
+                    e.preventDefault();
+                    btn.click();
+                });
+            });
+
+            if (!username) {
+                showNameScreen();
+            } else {
+                showScreen('homeScreen');
+            }
+
+            // Resize handler for canvas
+            const resizeCanvas = () => {
+                detectMobile();
+                if (gameActive) {
+                    // Re-render offscreen canvas at current size (canvas internal size stays same)
+                    renderOffscreen();
+                }
+            };
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        init();
+
+        // Prevent double-tap zoom on iOS
+        document.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Prevent context menu on long press for mobile
+        document.addEventListener('contextmenu', (e) => {
+            if (gameActive || e.target === canvas) {
+                e.preventDefault();
+            }
+        });
+
+        // Handle visibility change to pause game rendering
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && gameActive) {
+                // Game will pause rendering since requestAnimationFrame stops
+                // But we can leave state as is
+            }
+        });
+    </script>
+</body>
+</html>

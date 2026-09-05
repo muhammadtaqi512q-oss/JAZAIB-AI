@@ -1,0 +1,3365 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 VIBE Games Arcade - Play on Mobile & PC</title>
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --card: #1a1a3a;
+            --accent: #ff6b6b;
+            --accent2: #4ecdc4;
+            --accent3: #ffe66d;
+            --text: #e0e0e0;
+            --gold: #ffd700;
+            --modal-bg: #0d0d2b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* Particles BG */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 20px 10px 10px;
+        }
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            background: linear-gradient(135deg, var(--accent), var(--accent3), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        .search-bar {
+            margin: 12px auto;
+            max-width: 450px;
+            position: relative;
+            z-index: 1;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 2px solid #333;
+            background: #1a1a3a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-bar input:focus {
+            border-color: var(--accent2);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+        }
+        .category-filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0;
+            position: relative;
+            z-index: 1;
+            padding: 0 10px;
+        }
+        .cat-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #444;
+            background: transparent;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .cat-btn:hover,
+        .cat-btn.active {
+            background: var(--accent2);
+            color: #000;
+            border-color: var(--accent2);
+            font-weight: 700;
+        }
+
+        /* Game Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            padding: 10px 12px 30px;
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .game-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 16px;
+                padding: 15px 20px 40px;
+            }
+        }
+        .game-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 30px rgba(255, 107, 107, 0.25);
+        }
+        .game-card:active {
+            transform: scale(0.95);
+        }
+        .game-card .emoji {
+            font-size: 2.5rem;
+            transition: transform 0.3s;
+        }
+        .game-card:hover .emoji {
+            transform: scale(1.2) rotate(10deg);
+        }
+        .game-card .name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #ddd;
+            line-height: 1.2;
+        }
+        .game-card .cat-tag {
+            font-size: 0.6rem;
+            color: #999;
+            background: #222244;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .game-card.hidden {
+            display: none;
+        }
+        .game-card .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.55rem;
+            background: var(--accent);
+            color: #fff;
+            padding: 3px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal {
+            background: var(--modal-bg);
+            border-radius: 20px;
+            width: 95vw;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 2px solid #333;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.3s;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 18px;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            background: var(--modal-bg);
+            z-index: 10;
+            border-radius: 20px 20px 0 0;
+        }
+        .modal-header h2 {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #333;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn:hover {
+            background: var(--accent);
+            transform: rotate(90deg);
+        }
+        .modal-body {
+            padding: 16px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal-body canvas {
+            border-radius: 10px;
+            max-width: 100%;
+            touch-action: manipulation;
+        }
+        .game-ui {
+            width: 100%;
+            text-align: center;
+        }
+        .game-ui button {
+            padding: 10px 22px;
+            border-radius: 25px;
+            border: none;
+            background: var(--accent2);
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin: 4px;
+        }
+        .game-ui button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+        .game-ui button:active {
+            transform: scale(0.95);
+        }
+        .game-ui input {
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 2px solid #444;
+            background: #1a1a3a;
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            width: 120px;
+            outline: none;
+        }
+        .game-ui .score {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent3);
+        }
+        .game-ui .result {
+            font-size: 1rem;
+            margin: 6px 0;
+            color: #ccc;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
+        }
+
+        /* Confetti */
+        .confetti-piece {
+            position: fixed;
+            z-index: 2000;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width:400px) {
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding: 6px;
+            }
+            .game-card {
+                padding: 10px 6px;
+                border-radius: 12px;
+            }
+            .game-card .emoji {
+                font-size: 1.8rem;
+            }
+            .game-card .name {
+                font-size: 0.65rem;
+            }
+            .modal {
+                width: 98vw;
+                max-height: 95vh;
+                border-radius: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>🎮 VIBE Games Arcade</h1>
+        <p class="subtitle">All games work on Mobile 📱 & PC 💻 — Tap to Play! & CREATED & OWNED BY MUHAMMAD TAQI</p>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Search 50 games...">
+    </div>
+
+    <!-- Category Filters -->
+    <div class="category-filters" id="categoryFilters">
+        <button class="cat-btn active" data-cat="all">🎯 All</button>
+        <button class="cat-btn" data-cat="puzzle">🧩 Puzzle</button>
+        <button class="cat-btn" data-cat="action">🎯 Action</button>
+        <button class="cat-btn" data-cat="casino">🎰 Casino</button>
+        <button class="cat-btn" data-cat="brain">🧠 Brain</button>
+        <button class="cat-btn" data-cat="card">🃏 Card</button>
+        <button class="cat-btn" data-cat="word">📝 Word</button>
+        <button class="cat-btn" data-cat="fun">😄 Fun</button>
+    </div>
+
+    <!-- Game Grid -->
+    <div class="game-grid" id="gameGrid"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none;">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Game</h2>
+                <button class="close-btn" id="closeModal">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== PARTICLES ====================
+        (function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00cec9', '#fab1a0'];
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = p.style.height = (Math.random() * 6 + 2) + 'px';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDuration = (Math.random() * 12 + 8) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(p);
+            }
+        })();
+
+        // ==================== GAME DATA ====================
+        const games = [
+            { id: 1, name: 'Tic Tac Toe', emoji: '❌⭕', cat: 'puzzle', badge: 'Classic' },
+            { id: 2, name: 'Snake', emoji: '🐍', cat: 'action', badge: 'Addictive' },
+            { id: 3, name: 'Memory Match', emoji: '🧠', cat: 'puzzle', badge: 'Brain' },
+            { id: 4, name: 'Rock Paper Scissors', emoji: '✂️', cat: 'fun' },
+            { id: 5, name: 'Number Guess', emoji: '🔢', cat: 'brain' },
+            { id: 6, name: 'Whack-a-Mole', emoji: '🔨', cat: 'action', badge: 'Fast' },
+            { id: 7, name: 'Simon Says', emoji: '🎵', cat: 'brain' },
+            { id: 8, name: 'Word Scramble', emoji: '🔤', cat: 'word' },
+            { id: 9, name: 'Typing Speed', emoji: '⌨️', cat: 'brain' },
+            { id: 10, name: 'Math Quiz', emoji: '➕', cat: 'brain' },
+            { id: 11, name: 'Coin Flip', emoji: '🪙', cat: 'casino' },
+            { id: 12, name: 'Dice Roll', emoji: '🎲', cat: 'casino' },
+            { id: 13, name: 'Reaction Time', emoji: '⚡', cat: 'action' },
+            { id: 14, name: 'Pong', emoji: '🏓', cat: 'action', badge: '2P' },
+            { id: 15, name: 'Breakout', emoji: '🧱', cat: 'action' },
+            { id: 16, name: 'Flappy Bird', emoji: '🐦', cat: 'action', badge: 'Hard' },
+            { id: 17, name: '2048', emoji: '🔢', cat: 'puzzle', badge: 'Popular' },
+            { id: 18, name: 'Space Shooter', emoji: '🚀', cat: 'action' },
+            { id: 19, name: 'Hangman', emoji: '💀', cat: 'word' },
+            { id: 20, name: 'Connect Four', emoji: '🔴🟡', cat: 'puzzle' },
+            { id: 21, name: 'Minesweeper', emoji: '💣', cat: 'puzzle' },
+            { id: 22, name: 'Blackjack', emoji: '🃏', cat: 'casino' },
+            { id: 23, name: 'Roulette', emoji: '🎡', cat: 'casino' },
+            { id: 24, name: 'Slot Machine', emoji: '🎰', cat: 'casino' },
+            { id: 25, name: 'Bingo', emoji: '🎱', cat: 'casino' },
+            { id: 26, name: 'Color Match', emoji: '🎨', cat: 'brain' },
+            { id: 27, name: 'Click Counter', emoji: '👆', cat: 'fun' },
+            { id: 28, name: 'Bubble Pop', emoji: '🫧', cat: 'action' },
+            { id: 29, name: 'Pattern Memory', emoji: '🧩', cat: 'brain' },
+            { id: 30, name: 'Speed Math', emoji: '⏱️', cat: 'brain' },
+            { id: 31, name: 'Anagram', emoji: '📝', cat: 'word' },
+            { id: 32, name: 'Wordle Lite', emoji: '🟩', cat: 'word', badge: 'Trendy' },
+            { id: 33, name: 'Card War', emoji: '⚔️', cat: 'card' },
+            { id: 34, name: 'Maze Runner', emoji: '🏃', cat: 'action' },
+            { id: 35, name: 'Catch Falling', emoji: '🥅', cat: 'action' },
+            { id: 36, name: 'Aim Trainer', emoji: '🎯', cat: 'action' },
+            { id: 37, name: 'Quick Tap', emoji: '👆', cat: 'fun' },
+            { id: 38, name: 'Spin Wheel', emoji: '🎡', cat: 'casino' },
+            { id: 39, name: 'Higher or Lower', emoji: '📈', cat: 'casino' },
+            { id: 40, name: 'Trivia Quiz', emoji: '❓', cat: 'brain' },
+            { id: 41, name: 'Word Search', emoji: '🔍', cat: 'word' },
+            { id: 42, name: 'Sudoku Lite', emoji: '🧮', cat: 'puzzle' },
+            { id: 43, name: 'Pair Match', emoji: '👫', cat: 'puzzle' },
+            { id: 44, name: 'Jumpy Dino', emoji: '🦖', cat: 'action', badge: 'Fun' },
+            { id: 45, name: 'Ball Balance', emoji: '⚖️', cat: 'action' },
+            { id: 46, name: 'Emoji Riddle', emoji: '🤔', cat: 'fun' },
+            { id: 47, name: 'Countdown Game', emoji: '⏰', cat: 'fun' },
+            { id: 48, name: 'Odd One Out', emoji: '🔎', cat: 'brain' },
+            { id: 49, name: 'Alphabet Race', emoji: '🏁', cat: 'word' },
+            { id: 50, name: 'Lucky Number', emoji: '🍀', cat: 'casino' },
+        ];
+
+        // ==================== RENDER GAME GRID ====================
+        const grid = document.getElementById('gameGrid');
+        function renderGrid(filterCat = 'all', searchTerm = '') {
+            grid.innerHTML = '';
+            games.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.dataset.cat = g.cat;
+                card.dataset.name = g.name.toLowerCase();
+                card.innerHTML = `
+              ${g.badge ? `<span class="badge">${g.badge}</span>` : ''}
+              <span class="emoji">${g.emoji}</span>
+              <span class="name">${g.name}</span>
+              <span class="cat-tag">${g.cat}</span>
+            `;
+                card.addEventListener('click', () => openGame(g.id, g.name));
+                card.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    openGame(g.id, g.name);
+                });
+                grid.appendChild(card);
+            });
+            applyFilters(filterCat, searchTerm);
+        }
+
+        function applyFilters(cat, search) {
+            const cards = grid.querySelectorAll('.game-card');
+            cards.forEach(card => {
+                const matchCat = cat === 'all' || card.dataset.cat === cat;
+                const matchSearch = !search || card.dataset.name.includes(search.toLowerCase());
+                card.classList.toggle('hidden', !(matchCat && matchSearch));
+            });
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const activeCat = document.querySelector('.cat-btn.active')?.dataset.cat || 'all';
+            applyFilters(activeCat, e.target.value);
+        });
+
+        // Category buttons
+        document.getElementById('categoryFilters').addEventListener('click', (e) => {
+            if (e.target.classList.contains('cat-btn')) {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                const cat = e.target.dataset.cat;
+                const search = document.getElementById('searchInput').value;
+                applyFilters(cat, search);
+            }
+        });
+
+        renderGrid();
+
+        // ==================== MODAL SYSTEM ====================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        let activeGameCleanup = null;
+
+        function openGame(id, name) {
+            if (activeGameCleanup) activeGameCleanup();
+            modalTitle.textContent = name;
+            modalBody.innerHTML = '<p style="color:#aaa;">Loading...</p>';
+            modalOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => loadGame(id), 50);
+        }
+
+        function closeModal() {
+            if (activeGameCleanup) activeGameCleanup();
+            activeGameCleanup = null;
+            modalOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+            modalBody.innerHTML = '';
+        }
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.style.display === 'flex') closeModal();
+        });
+
+        function spawnConfetti(count = 40) {
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8', '#00cec9', '#ffd700',
+            '#ff9ff3'];
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.top = -(Math.random() * 40 + 10) + 'px';
+                piece.style.width = piece.style.height = (Math.random() * 10 + 5) + 'px';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                piece.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 2500);
+            }
+        }
+
+        // ==================== GAME LOADER ====================
+        function loadGame(id) {
+            const body = modalBody;
+            body.innerHTML = '';
+            activeGameCleanup = null;
+            switch (id) {
+                case 1:
+                    loadTicTacToe(body);
+                    break;
+                case 2:
+                    loadSnake(body);
+                    break;
+                case 3:
+                    loadMemoryMatch(body);
+                    break;
+                case 4:
+                    loadRPS(body);
+                    break;
+                case 5:
+                    loadNumberGuess(body);
+                    break;
+                case 6:
+                    loadWhackAMole(body);
+                    break;
+                case 7:
+                    loadSimonSays(body);
+                    break;
+                case 8:
+                    loadWordScramble(body);
+                    break;
+                case 9:
+                    loadTypingSpeed(body);
+                    break;
+                case 10:
+                    loadMathQuiz(body);
+                    break;
+                case 11:
+                    loadCoinFlip(body);
+                    break;
+                case 12:
+                    loadDiceRoll(body);
+                    break;
+                case 13:
+                    loadReactionTime(body);
+                    break;
+                case 14:
+                    loadPong(body);
+                    break;
+                case 15:
+                    loadBreakout(body);
+                    break;
+                case 16:
+                    loadFlappyBird(body);
+                    break;
+                case 17:
+                    load2048(body);
+                    break;
+                case 18:
+                    loadSpaceShooter(body);
+                    break;
+                case 19:
+                    loadHangman(body);
+                    break;
+                case 20:
+                    loadConnectFour(body);
+                    break;
+                case 21:
+                    loadMinesweeper(body);
+                    break;
+                case 22:
+                    loadBlackjack(body);
+                    break;
+                case 23:
+                    loadRoulette(body);
+                    break;
+                case 24:
+                    loadSlotMachine(body);
+                    break;
+                case 25:
+                    loadBingo(body);
+                    break;
+                case 26:
+                    loadColorMatch(body);
+                    break;
+                case 27:
+                    loadClickCounter(body);
+                    break;
+                case 28:
+                    loadBubblePop(body);
+                    break;
+                case 29:
+                    loadPatternMemory(body);
+                    break;
+                case 30:
+                    loadSpeedMath(body);
+                    break;
+                case 31:
+                    loadAnagram(body);
+                    break;
+                case 32:
+                    loadWordleLite(body);
+                    break;
+                case 33:
+                    loadCardWar(body);
+                    break;
+                case 34:
+                    loadMazeRunner(body);
+                    break;
+                case 35:
+                    loadCatchFalling(body);
+                    break;
+                case 36:
+                    loadAimTrainer(body);
+                    break;
+                case 37:
+                    loadQuickTap(body);
+                    break;
+                case 38:
+                    loadSpinWheel(body);
+                    break;
+                case 39:
+                    loadHigherLower(body);
+                    break;
+                case 40:
+                    loadTriviaQuiz(body);
+                    break;
+                case 41:
+                    loadWordSearch(body);
+                    break;
+                case 42:
+                    loadSudokuLite(body);
+                    break;
+                case 43:
+                    loadPairMatch(body);
+                    break;
+                case 44:
+                    loadJumpyDino(body);
+                    break;
+                case 45:
+                    loadBallBalance(body);
+                    break;
+                case 46:
+                    loadEmojiRiddle(body);
+                    break;
+                case 47:
+                    loadCountdownGame(body);
+                    break;
+                case 48:
+                    loadOddOneOut(body);
+                    break;
+                case 49:
+                    loadAlphabetRace(body);
+                    break;
+                case 50:
+                    loadLuckyNumber(body);
+                    break;
+                default:
+                    body.innerHTML = '<p>Game not found!</p>';
+            }
+        }
+
+        // ==================== GAME IMPLEMENTATIONS ====================
+
+        // 1. Tic Tac Toe
+        function loadTicTacToe(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="tttStatus">Your turn (X)</p>
+              <div id="tttBoard" style="display:grid;grid-template-columns:repeat(3,80px);gap:6px;justify-content:center;margin:10px 0;"></div>
+              <button id="tttReset">🔄 Reset</button>
+              <p class="result" id="tttResult"></p>
+            </div>`;
+            const boardEl = document.getElementById('tttBoard');
+            const statusEl = document.getElementById('tttStatus');
+            const resultEl = document.getElementById('tttResult');
+            let board = Array(9).fill(null);
+            let playerTurn = true;
+            let gameOver = false;
+
+            function checkWin(b) {
+                const wins = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6]
+                ];
+                for (const [a, bb, c] of wins) {
+                    if (b[a] && b[a] === b[bb] && b[a] === b[c]) return b[a];
+                }
+                return b.every(v => v) ? 'draw' : null;
+            }
+
+            function aiMove() {
+                if (gameOver) return;
+                const empty = board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (empty.length === 0) return;
+                const pick = empty[Math.floor(Math.random() * empty.length)];
+                board[pick] = 'O';
+                renderBoard();
+                const winner = checkWin(board);
+                if (winner === 'O') { statusEl.textContent = 'AI wins! 😢';
+                    resultEl.textContent = 'You lost!';
+                    gameOver = true;
+                    spawnConfetti(20); } else if (winner === 'draw') { statusEl.textContent = "It's a draw!";
+                    gameOver = true; } else { statusEl.textContent = 'Your turn (X)';
+                    playerTurn = true; }
+            }
+
+            function renderBoard() {
+                boardEl.innerHTML = '';
+                board.forEach((v, i) => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:80px;height:80px;background:#1a1a3a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;border:2px solid #444;';
+                    cell.textContent = v || '';
+                    cell.addEventListener('click', () => {
+                        if (!playerTurn || gameOver || board[i]) return;
+                        board[i] = 'X';
+                        playerTurn = false;
+                        renderBoard();
+                        const winner = checkWin(board);
+                        if (winner === 'X') { statusEl.textContent = 'You win! 🎉';
+                            gameOver = true;
+                            spawnConfetti(); } else if (winner === 'draw') { statusEl.textContent = "It's a draw!";
+                            gameOver = true; } else { statusEl.textContent = 'AI thinking...';
+                            setTimeout(aiMove, 400); }
+                    });
+                    boardEl.appendChild(cell);
+                });
+            }
+            document.getElementById('tttReset').addEventListener('click', () => {
+                board = Array(9).fill(null);
+                playerTurn = true;
+                gameOver = false;
+                statusEl.textContent = 'Your turn (X)';
+                resultEl.textContent = '';
+                renderBoard();
+            });
+            renderBoard();
+            activeGameCleanup = () => { gameOver = true; };
+        }
+
+        // 2. Snake
+        function loadSnake(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="snakeScore">0</span></p>
+              <canvas id="snakeCanvas" width="300" height="300" style="background:#111;border-radius:10px;"></canvas>
+              <br><button id="snakeRestart">🔄 Restart</button>
+              <p style="font-size:0.7rem;color:#888;">Swipe or Arrow Keys</p>
+            </div>`;
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('snakeScore');
+            const size = 15;
+            let snake, dir, food, score, interval, running;
+            let nextDir;
+
+            function init() {
+                snake = [{ x: 8, y: 10 }, { x: 7, y: 10 }, { x: 6, y: 10 }];
+                dir = { x: 1, y: 0 };
+                nextDir = { x: 1, y: 0 };
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                spawnFood();
+                if (interval) clearInterval(interval);
+                interval = setInterval(loop, 130);
+            }
+
+            function spawnFood() {
+                do {
+                    food = { x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20) };
+                } while (snake.some(s => s.x === food.x && s.y === food.y));
+            }
+
+            function loop() {
+                if (!running) return;
+                dir = { ...nextDir };
+                const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+                if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || snake.some(s => s.x === head.x && s
+                        .y === head.y)) {
+                    running = false;
+                    clearInterval(interval);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '20px sans-serif';
+                    ctx.fillText('Game Over!', 70, 155);
+                    return;
+                }
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) { score += 10;
+                    scoreEl.textContent = score;
+                    spawnFood(); } else { snake.pop(); }
+                draw();
+            }
+
+            function draw() {
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, 300, 300);
+                ctx.fillStyle = '#4ecdc4';
+                snake.forEach(s => ctx.fillRect(s.x * size, s.y * size, size - 1, size - 1));
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillRect(food.x * size, food.y * size, size - 1, size - 1);
+            }
+
+            function changeDir(dx, dy) {
+                if (dx !== 0 && dir.x === -dx) return;
+                if (dy !== 0 && dir.y === -dy) return;
+                nextDir = { x: dx, y: dy };
+            }
+            document.addEventListener('keydown', function kd(e) {
+                if (!running) return;
+                if (e.key === 'ArrowUp') changeDir(0, -1);
+                if (e.key === 'ArrowDown') changeDir(0, 1);
+                if (e.key === 'ArrowLeft') changeDir(-1, 0);
+                if (e.key === 'ArrowRight') changeDir(1, 0);
+            });
+            let touchStart = { x: 0, y: 0 };
+            canvas.addEventListener('touchstart', e => { const t = e.touches[0];
+                touchStart = { x: t.clientX, y: t.clientY }; });
+            canvas.addEventListener('touchend', e => {
+                const t = e.changedTouches[0];
+                const dx = t.clientX - touchStart.x;
+                const dy = t.clientY - touchStart.y;
+                if (Math.abs(dx) > Math.abs(dy)) changeDir(dx > 0 ? 1 : -1, 0);
+                else changeDir(0, dy > 0 ? 1 : -1);
+            });
+            document.getElementById('snakeRestart').addEventListener('click', init);
+            init();
+            activeGameCleanup = () => { running = false;
+                clearInterval(interval); };
+        }
+
+        // 3. Memory Match
+        function loadMemoryMatch(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Pairs: <span id="memPairs">0</span>/8 | Moves: <span id="memMoves">0</span></p>
+              <div id="memGrid" style="display:grid;grid-template-columns:repeat(4,65px);gap:6px;justify-content:center;"></div>
+              <button id="memReset">🔄 New Game</button>
+            </div>`;
+            const gridEl = document.getElementById('memGrid');
+            const pairsEl = document.getElementById('memPairs');
+            const movesEl = document.getElementById('memMoves');
+            let cards, flipped, matched, moves, locked;
+            const emojis = ['🍎', '🍋', '🍇', '🍒', '🌸', '⭐', '🌈', '🎵'];
+
+            function init() {
+                const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+                cards = deck;
+                flipped = [];
+                matched = new Set();
+                moves = 0;
+                locked = false;
+                pairsEl.textContent = '0';
+                movesEl.textContent = '0';
+                renderGrid();
+            }
+
+            function renderGrid() {
+                gridEl.innerHTML = '';
+                cards.forEach((emoji, i) => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:65px;height:65px;background:#1a1a3a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;border:2px solid #444;transition:all 0.3s;';
+                    if (flipped.includes(i) || matched.has(i)) {
+                        cell.textContent = emoji;
+                        cell.style.background = '#2a2a5a';
+                    } else {
+                        cell.textContent = '?';
+                    }
+                    cell.addEventListener('click', () => flipCard(i));
+                    gridEl.appendChild(cell);
+                });
+            }
+
+            function flipCard(i) {
+                if (locked || flipped.includes(i) || matched.has(i) || flipped.length >= 2) return;
+                flipped.push(i);
+                renderGrid();
+                if (flipped.length === 2) {
+                    locked = true;
+                    moves++;
+                    movesEl.textContent = moves;
+                    const [a, b] = flipped;
+                    if (cards[a] === cards[b]) {
+                        matched.add(a);
+                        matched.add(b);
+                        pairsEl.textContent = matched.size / 2;
+                        flipped = [];
+                        locked = false;
+                        renderGrid();
+                        if (matched.size === cards.length) { spawnConfetti();
+                            setTimeout(() => alert('🎉 You won!'), 200); }
+                    } else {
+                        setTimeout(() => { flipped = [];
+                            locked = false;
+                            renderGrid(); }, 700);
+                    }
+                }
+            }
+            document.getElementById('memReset').addEventListener('click', init);
+            init();
+            activeGameCleanup = () => { locked = true; };
+        }
+
+        // 4. Rock Paper Scissors
+        function loadRPS(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="rpsScore">Score: 0 - 0</p>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="rpsBtn" data-choice="rock">🪨 Rock</button>
+                <button class="rpsBtn" data-choice="paper">📄 Paper</button>
+                <button class="rpsBtn" data-choice="scissors">✂️ Scissors</button>
+              </div>
+              <p class="result" id="rpsResult"></p>
+            </div>`;
+            let playerScore = 0,
+                aiScore = 0;
+            const scoreEl = document.getElementById('rpsScore');
+            const resultEl = document.getElementById('rpsResult');
+            body.querySelectorAll('.rpsBtn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const player = btn.dataset.choice;
+                    const choices = ['rock', 'paper', 'scissors'];
+                    const ai = choices[Math.floor(Math.random() * 3)];
+                    let result = '';
+                    if (player === ai) result = "It's a tie! 🤝";
+                    else if ((player === 'rock' && ai === 'scissors') || (player === 'paper' && ai ===
+                            'rock') || (player === 'scissors' && ai === 'paper')) {
+                        result = 'You win! 🎉';
+                        playerScore++;
+                        spawnConfetti(15);
+                    } else { result = 'AI wins! 😢';
+                        aiScore++; }
+                    scoreEl.textContent = `Score: ${playerScore} - ${aiScore}`;
+                    resultEl.textContent = `You: ${player} | AI: ${ai} — ${result}`;
+                });
+            });
+        }
+
+        // 5. Number Guess
+        function loadNumberGuess(body) {
+            const target = Math.floor(Math.random() * 100) + 1;
+            let attempts = 0;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Guess a number between 1-100</p>
+              <input type="number" id="ngInput" min="1" max="100" placeholder="1-100">
+              <button id="ngGuess">Guess!</button>
+              <p class="result" id="ngResult"></p>
+              <p>Attempts: <span id="ngAttempts">0</span></p>
+            </div>`;
+            document.getElementById('ngGuess').addEventListener('click', () => {
+                const guess = parseInt(document.getElementById('ngInput').value);
+                if (!guess || guess < 1 || guess > 100) return;
+                attempts++;
+                document.getElementById('ngAttempts').textContent = attempts;
+                if (guess === target) {
+                    document.getElementById('ngResult').textContent =
+                        `🎉 Correct! The number was ${target}. You took ${attempts} attempts.`;
+                    spawnConfetti();
+                } else if (guess < target) document.getElementById('ngResult').textContent = '📈 Higher!';
+                else document.getElementById('ngResult').textContent = '📉 Lower!';
+            });
+        }
+
+        // 6. Whack-a-Mole
+        function loadWhackAMole(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="wamScore">0</span> | Time: <span id="wamTime">15</span>s</p>
+              <div id="wamGrid" style="display:grid;grid-template-columns:repeat(3,80px);gap:8px;justify-content:center;"></div>
+              <button id="wamStart">🔨 Start!</button>
+            </div>`;
+            let score, time, interval, moleInterval, active;
+            const gridEl = document.getElementById('wamGrid');
+            const scoreEl = document.getElementById('wamScore');
+            const timeEl = document.getElementById('wamTime');
+
+            function init() {
+                score = 0;
+                time = 15;
+                active = null;
+                scoreEl.textContent = '0';
+                timeEl.textContent = '15';
+                gridEl.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const hole = document.createElement('div');
+                    hole.style.cssText =
+                        'width:80px;height:80px;background:#1a1a3a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;cursor:pointer;border:3px solid #444;';
+                    hole.textContent = '';
+                    hole.addEventListener('click', () => {
+                        if (active === i) { score++;
+                            scoreEl.textContent = score;
+                            active = null;
+                            renderHoles();
+                            spawnConfetti(5); }
+                    });
+                    gridEl.appendChild(hole);
+                }
+            }
+
+            function renderHoles() {
+                const holes = gridEl.children;
+                for (let i = 0; i < 9; i++) holes[i].textContent = active === i ? '🐹' : '';
+            }
+
+            function spawnMole() {
+                active = Math.floor(Math.random() * 9);
+                renderHoles();
+                setTimeout(() => { if (active !== null) { active = null;
+                        renderHoles(); } }, 600);
+            }
+            document.getElementById('wamStart').addEventListener('click', () => {
+                if (interval) clearInterval(interval);
+                if (moleInterval) clearInterval(moleInterval);
+                init();
+                interval = setInterval(() => {
+                    time--;
+                    timeEl.textContent = time;
+                    if (time <= 0) { clearInterval(interval);
+                        clearInterval(moleInterval);
+                        active = null;
+                        renderHoles();
+                        alert(`⏰ Time's up! Score: ${score}`); }
+                }, 1000);
+                moleInterval = setInterval(spawnMole, 700);
+            });
+            init();
+            activeGameCleanup = () => { clearInterval(interval);
+                clearInterval(moleInterval); };
+        }
+
+        // 7. Simon Says
+        function loadSimonSays(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Level: <span id="simonLevel">1</span></p>
+              <div id="simonGrid" style="display:grid;grid-template-columns:repeat(2,90px);gap:10px;justify-content:center;"></div>
+              <button id="simonStart">🎵 Start</button>
+              <p class="result" id="simonResult"></p>
+            </div>`;
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe'];
+            let sequence, playerSeq, level, canClick;
+            const gridEl = document.getElementById('simonGrid');
+            const levelEl = document.getElementById('simonLevel');
+            const resultEl = document.getElementById('simonResult');
+
+            function init() {
+                sequence = [];
+                playerSeq = [];
+                level = 1;
+                canClick = false;
+                levelEl.textContent = '1';
+                resultEl.textContent = '';
+                gridEl.innerHTML = '';
+                colors.forEach((c, i) => {
+                    const btn = document.createElement('div');
+                    btn.style.cssText = `width:90px;height:90px;background:${c};border-radius:15px;cursor:pointer;opacity:0.7;transition:all 0.2s;`;
+                    btn.addEventListener('click', () => {
+                        if (!canClick) return;
+                        btn.style.opacity = '1';
+                        setTimeout(() => btn.style.opacity = '0.7', 200);
+                        playerSeq.push(i);
+                        if (playerSeq[playerSeq.length - 1] !== sequence[playerSeq.length - 1]) {
+                            resultEl.textContent = `❌ Wrong! You reached Level ${level}.`;
+                            canClick = false;
+                            return;
+                        }
+                        if (playerSeq.length === sequence.length) {
+                            level++;
+                            levelEl.textContent = level;
+                            playerSeq = [];
+                            canClick = false;
+                            spawnConfetti(10);
+                            setTimeout(addToSequence, 800);
+                        }
+                    });
+                    gridEl.appendChild(btn);
+                });
+            }
+
+            function addToSequence() {
+                sequence.push(Math.floor(Math.random() * 4));
+                playerSeq = [];
+                playSequence();
+            }
+
+            function playSequence() {
+                canClick = false;
+                const btns = gridEl.children;
+                sequence.forEach((idx, delay) => {
+                    setTimeout(() => {
+                        btns[idx].style.opacity = '1';
+                        setTimeout(() => btns[idx].style.opacity = '0.7', 350);
+                    }, delay * 500 + 200);
+                });
+                setTimeout(() => { canClick = true; }, sequence.length * 500 + 300);
+            }
+            document.getElementById('simonStart').addEventListener('click', () => { init();
+                setTimeout(addToSequence, 500); });
+            init();
+            activeGameCleanup = () => { canClick = false; };
+        }
+
+        // 8. Word Scramble
+        function loadWordScramble(body) {
+            const words = ['JAVASCRIPT', 'PYTHON', 'GAMING', 'PUZZLE', 'CODING', 'ARCADE', 'MOBILE', 'COMPUTER'];
+            let word, scrambled;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Unscramble: <b id="wsWord">----</b></p>
+              <input type="text" id="wsInput" placeholder="Your answer">
+              <button id="wsCheck">✅ Check</button>
+              <button id="wsNew">🔄 New Word</button>
+              <p class="result" id="wsResult"></p>
+            </div>`;
+            const wordEl = document.getElementById('wsWord');
+            const resultEl = document.getElementById('wsResult');
+            const inputEl = document.getElementById('wsInput');
+
+            function newWord() {
+                word = words[Math.floor(Math.random() * words.length)];
+                scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+                while (scrambled === word) scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+                wordEl.textContent = scrambled;
+                resultEl.textContent = '';
+                inputEl.value = '';
+            }
+            document.getElementById('wsCheck').addEventListener('click', () => {
+                if (inputEl.value.toUpperCase() === word) { resultEl.textContent = '🎉 Correct!';
+                    spawnConfetti(); } else resultEl.textContent = '❌ Try again!';
+            });
+            document.getElementById('wsNew').addEventListener('click', newWord);
+            newWord();
+        }
+
+        // 9. Typing Speed
+        function loadTypingSpeed(body) {
+            const sentences = ['The quick brown fox jumps over the lazy dog', 'Coding is fun and creative',
+                'Mobile gaming is the future', 'Practice makes perfect every day', 'Speed and accuracy matter'
+            ];
+            let sentence, startTime;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p id="tsSentence" style="font-size:1.1rem;color:#fff;"></p>
+              <input type="text" id="tsInput" placeholder="Type here..." style="width:80%;">
+              <button id="tsStart">▶️ Start</button>
+              <p class="result" id="tsResult"></p>
+            </div>`;
+            const sentEl = document.getElementById('tsSentence');
+            const resultEl = document.getElementById('tsResult');
+            const inputEl = document.getElementById('tsInput');
+            document.getElementById('tsStart').addEventListener('click', () => {
+                sentence = sentences[Math.floor(Math.random() * sentences.length)];
+                sentEl.textContent = sentence;
+                inputEl.value = '';
+                inputEl.focus();
+                startTime = Date.now();
+                resultEl.textContent = 'Type and press Enter...';
+            });
+            inputEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && startTime) {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const wpm = Math.round((inputEl.value.split(' ').length / elapsed) * 60);
+                    const correct = inputEl.value.trim() === sentence;
+                    resultEl.textContent = correct ? `✅ ${wpm} WPM — Perfect!` :
+                        `⚠️ ~${wpm} WPM — Text doesn't match exactly.`;
+                    if (correct) spawnConfetti();
+                    startTime = null;
+                }
+            });
+        }
+
+        // 10. Math Quiz
+        function loadMathQuiz(body) {
+            let a, b, op, answer, score = 0,
+                qCount = 0;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="mqScore">0</span>/<span id="mqCount">0</span></p>
+              <p style="font-size:1.5rem;color:#fff;" id="mqQuestion">--</p>
+              <input type="number" id="mqInput" placeholder="Answer">
+              <button id="mqSubmit">✅ Submit</button>
+              <p class="result" id="mqResult"></p>
+            </div>`;
+            const scoreEl = document.getElementById('mqScore');
+            const countEl = document.getElementById('mqCount');
+            const qEl = document.getElementById('mqQuestion');
+            const resultEl = document.getElementById('mqResult');
+            const inputEl = document.getElementById('mqInput');
+
+            function newQ() {
+                a = Math.floor(Math.random() * 50) + 1;
+                b = Math.floor(Math.random() * 50) + 1;
+                const ops = ['+', '-', '×'];
+                op = ops[Math.floor(Math.random() * 3)];
+                if (op === '+') answer = a + b;
+                if (op === '-') answer = Math.max(a, b) - Math.min(a, b);
+                if (op === '×') answer = a * b;
+                if (op === '-') qEl.textContent = `${Math.max(a,b)} - ${Math.min(a,b)} = ?`;
+                else qEl.textContent = `${a} ${op} ${b} = ?`;
+                inputEl.value = '';
+                inputEl.focus();
+            }
+            document.getElementById('mqSubmit').addEventListener('click', () => {
+                const userAns = parseInt(inputEl.value);
+                qCount++;
+                countEl.textContent = qCount;
+                if (userAns === answer) { score++;
+                    scoreEl.textContent = score;
+                    resultEl.textContent = '✅ Correct!';
+                    spawnConfetti(5); } else resultEl.textContent = `❌ Answer: ${answer}`;
+                newQ();
+            });
+            newQ();
+        }
+
+        // 11. Coin Flip
+        function loadCoinFlip(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:4rem;" id="cfCoin">🪙</p>
+              <button id="cfFlip">🔄 Flip Coin</button>
+              <p class="result" id="cfResult"></p>
+            </div>`;
+            document.getElementById('cfFlip').addEventListener('click', () => {
+                const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+                const emoji = result === 'Heads' ? '🪙' : '💿';
+                document.getElementById('cfCoin').textContent = emoji;
+                document.getElementById('cfResult').textContent = `It's ${result}!`;
+                if (result === 'Heads') spawnConfetti(10);
+            });
+        }
+
+        // 12. Dice Roll
+        function loadDiceRoll(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:4rem;" id="drDice">🎲</p>
+              <button id="drRoll">🎲 Roll Dice</button>
+              <p class="result" id="drResult"></p>
+            </div>`;
+            document.getElementById('drRoll').addEventListener('click', () => {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                const diceEmojis = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                document.getElementById('drDice').textContent = diceEmojis[roll];
+                document.getElementById('drResult').textContent = `You rolled: ${roll}`;
+                if (roll === 6) spawnConfetti(15);
+            });
+        }
+
+        // 13. Reaction Time
+        function loadReactionTime(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="rtStatus">Wait for green...</p>
+              <div id="rtBox" style="width:200px;height:200px;background:#ff6b6b;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0 auto;font-size:1.2rem;font-weight:700;">TAP</div>
+              <p class="result" id="rtResult"></p>
+            </div>`;
+            let waiting = false,
+                startTime;
+            const box = document.getElementById('rtBox');
+            const statusEl = document.getElementById('rtStatus');
+            const resultEl = document.getElementById('rtResult');
+            box.addEventListener('click', () => {
+                if (!waiting) {
+                    waiting = true;
+                    box.style.background = '#ff6b6b';
+                    statusEl.textContent = 'Wait for green...';
+                    resultEl.textContent = '';
+                    const delay = Math.random() * 2000 + 1000;
+                    setTimeout(() => {
+                        if (!waiting) return;
+                        box.style.background = '#2ecc71';
+                        statusEl.textContent = 'TAP NOW!';
+                        startTime = Date.now();
+                    }, delay);
+                } else if (box.style.background === 'rgb(46, 204, 113)') {
+                    const reaction = Date.now() - startTime;
+                    resultEl.textContent = `⚡ ${reaction}ms!`;
+                    statusEl.textContent = 'Tap to try again';
+                    box.style.background = '#ff6b6b';
+                    waiting = false;
+                    if (reaction < 300) spawnConfetti(20);
+                }
+            });
+            activeGameCleanup = () => { waiting = false; };
+        }
+
+        // 14. Pong
+        function loadPong(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">You: <span id="pongP1">0</span> | AI: <span id="pongP2">0</span></p>
+              <canvas id="pongCanvas" width="350" height="220" style="background:#111;border-radius:10px;"></canvas>
+              <p style="font-size:0.7rem;color:#888;">Move mouse/touch vertically</p>
+            </div>`;
+            const canvas = document.getElementById('pongCanvas');
+            const ctx = canvas.getContext('2d');
+            let paddleY = 85,
+                aiY = 85,
+                ball, p1Score = 0,
+                p2Score = 0,
+                running = true,
+                animId;
+            const p1El = document.getElementById('pongP1');
+            const p2El = document.getElementById('pongP2');
+            const pw = 10,
+                ph = 50,
+                bw = 10;
+
+            function resetBall() { ball = { x: 175, y: 110, vx: (Math.random() > 0.5 ? 3 : -3), vy: (Math.random() - 0.5) *
+                    4 }; }
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, 350, 220);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillRect(5, paddleY, pw, ph);
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillRect(335, aiY, pw, ph);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(ball.x, ball.y, bw, bw);
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                if (ball.y <= 0 || ball.y >= 210) ball.vy *= -1;
+                if (ball.x <= 15 && ball.y > paddleY && ball.y < paddleY + ph) ball.vx *= -1;
+                if (ball.x >= 325 && ball.y > aiY && ball.y < aiY + ph) ball.vx *= -1;
+                if (ball.x < 0) { p2Score++;
+                    p2El.textContent = p2Score;
+                    resetBall(); }
+                if (ball.x > 350) { p1Score++;
+                    p1El.textContent = p1Score;
+                    resetBall();
+                    spawnConfetti(8); }
+                aiY += (ball.y - (aiY + ph / 2)) * 0.06;
+                aiY = Math.max(0, Math.min(170, aiY));
+                animId = requestAnimationFrame(loop);
+            }
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                paddleY = (e.clientY - rect.top) * (220 / rect.height) - ph / 2;
+                paddleY = Math.max(0, Math.min(170, paddleY));
+            });
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                paddleY = (e.touches[0].clientY - rect.top) * (220 / rect.height) - ph / 2;
+                paddleY = Math.max(0, Math.min(170, paddleY));
+            }, { passive: false });
+            resetBall();
+            loop();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 15. Breakout
+        function loadBreakout(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="boScore">0</span></p>
+              <canvas id="boCanvas" width="320" height="350" style="background:#111;border-radius:10px;"></canvas>
+            </div>`;
+            const canvas = document.getElementById('boCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('boScore');
+            let paddleX = 120,
+                ball, bricks, score, running = true,
+                animId;
+            const pw = 70,
+                ph = 10;
+
+            function init() {
+                ball = { x: 160, y: 280, vx: 2.5, vy: -3 };
+                bricks = [];
+                score = 0;
+                scoreEl.textContent = '0';
+                for (let r = 0; r < 5; r++)
+                    for (let c = 0; c < 7; c++)
+                        bricks.push({ x: c * 42 + 12, y: r * 22 + 30, w: 36, h: 16, alive: true });
+            }
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, 320, 350);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillRect(paddleX, 330, pw, ph);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(ball.x, ball.y, 10, 10);
+                bricks.forEach(b => {
+                    if (b.alive) { ctx.fillStyle = ['#ff6b6b', '#ffe66d', '#4ecdc4', '#a29bfe', '#fd79a8'][Math
+                            .floor(b.y / 22) % 5];
+                        ctx.fillRect(b.x, b.y, b.w, b.h); }
+                });
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                if (ball.x <= 0 || ball.x >= 310) ball.vx *= -1;
+                if (ball.y <= 0) ball.vy *= -1;
+                if (ball.y >= 320 && ball.y <= 340 && ball.x > paddleX && ball.x < paddleX + pw) ball.vy *= -1;
+                if (ball.y > 350) { running = false;
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '18px sans-serif';
+                    ctx.fillText('Game Over!', 100, 180); }
+                bricks.forEach(b => {
+                    if (b.alive && ball.x + 10 > b.x && ball.x < b.x + b.w && ball.y + 10 > b.y && ball.y < b.y +
+                        b.h) {
+                        b.alive = false;
+                        ball.vy *= -1;
+                        score += 10;
+                        scoreEl.textContent = score;
+                        if (bricks.every(b2 => !b2.alive)) { running = false;
+                            spawnConfetti(30); }
+                    }
+                });
+                if (running) animId = requestAnimationFrame(loop);
+            }
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                paddleX = (e.clientX - rect.left) * (320 / rect.width) - pw / 2;
+                paddleX = Math.max(0, Math.min(250, paddleX));
+            });
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                paddleX = (e.touches[0].clientX - rect.left) * (320 / rect.width) - pw / 2;
+                paddleX = Math.max(0, Math.min(250, paddleX));
+            }, { passive: false });
+            init();
+            loop();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 16. Flappy Bird (simplified)
+        function loadFlappyBird(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="fbScore">0</span></p>
+              <canvas id="fbCanvas" width="300" height="350" style="background:#87CEEB;border-radius:10px;"></canvas>
+              <p style="font-size:0.7rem;color:#888;">Tap/Click to flap</p>
+            </div>`;
+            const canvas = document.getElementById('fbCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('fbScore');
+            let birdY = 150,
+                birdVY = 0,
+                pipes, score, running, animId, frame;
+            const GRAVITY = 0.35;
+
+            function init() {
+                birdY = 150;
+                birdVY = 0;
+                pipes = [{ x: 350, gapY: 140 + Math.random() * 120 }];
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                frame = 0;
+                if (animId) cancelAnimationFrame(animId);
+                loop();
+            }
+
+            function loop() {
+                if (!running) return;
+                frame++;
+                ctx.fillStyle = '#87CEEB';
+                ctx.fillRect(0, 0, 300, 350);
+                birdVY += GRAVITY;
+                birdY += birdVY;
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(80, birdY, 22, 22);
+                ctx.fillStyle = '#2ecc71';
+                pipes.forEach(p => {
+                    ctx.fillRect(p.x, 0, 40, p.gapY - 60);
+                    ctx.fillRect(p.x, p.gapY + 60, 40, 350 - p.gapY - 60);
+                });
+                if (frame % 80 === 0) pipes.push({ x: 350, gapY: 120 + Math.random() * 140 });
+                pipes.forEach(p => p.x -= 2.5);
+                pipes = pipes.filter(p => {
+                    if (p.x < -50) { score++;
+                        scoreEl.textContent = score;
+                        spawnConfetti(5); return false; }
+                    return true;
+                });
+                if (birdY > 340 || birdY < -10) { running = false;
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '18px sans-serif';
+                    ctx.fillText('Game Over!', 90, 175); }
+                pipes.forEach(p => {
+                    if (80 + 22 > p.x && 80 < p.x + 40 && (birdY < p.gapY - 60 || birdY + 22 > p.gapY + 60)) {
+                        running = false;
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '18px sans-serif';
+                        ctx.fillText('Game Over!', 90, 175);
+                    }
+                });
+                if (running) animId = requestAnimationFrame(loop);
+            }
+            function flap() { if (running) birdVY = -6; else init(); }
+            canvas.addEventListener('click', flap);
+            canvas.addEventListener('touchstart', e => { e.preventDefault();
+                flap(); });
+            init();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 17. 2048 (simplified)
+        function load2048(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="g2048Score">0</span></p>
+              <div id="g2048Grid" style="display:grid;grid-template-columns:repeat(4,65px);gap:6px;justify-content:center;"></div>
+              <button id="g2048Reset">🔄 Restart</button>
+              <p style="font-size:0.7rem;color:#888;">Arrow keys or swipe</p>
+            </div>`;
+            const gridEl = document.getElementById('g2048Grid');
+            const scoreEl = document.getElementById('g2048Score');
+            let grid, score, gameOver;
+            const size = 4;
+
+            function init() {
+                grid = Array(size).fill(null).map(() => Array(size).fill(0));
+                score = 0;
+                gameOver = false;
+                scoreEl.textContent = '0';
+                addRandom();
+                addRandom();
+                render();
+            }
+
+            function addRandom() {
+                const empty = [];
+                for (let r = 0; r < size; r++)
+                    for (let c = 0; c < size; c++)
+                        if (grid[r][c] === 0) empty.push({ r, c });
+                if (empty.length > 0) {
+                    const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+                    grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+                }
+            }
+
+            function render() {
+                gridEl.innerHTML = '';
+                const colors = { 0: '#1a1a3a', 2: '#2a2a5a', 4: '#3a3a6a', 8: '#f9a825', 16: '#ff8f00', 32: '#ff6d00',
+                    64: '#dd2c00', 128: '#ffe66d', 256: '#ffd600', 512: '#ffc400', 1024: '#ffab00', 2048: '#4ecdc4' };
+                grid.forEach(row => row.forEach(val => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        `width:65px;height:65px;background:${colors[val]||'#111'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:${val>4?'#000':'#fff'};`;
+                    cell.textContent = val || '';
+                    gridEl.appendChild(cell);
+                }));
+                scoreEl.textContent = score;
+            }
+
+            function move(dir) {
+                if (gameOver) return;
+                let moved = false;
+                const oldGrid = grid.map(r => [...r]);
+                if (dir === 'left' || dir === 'right') {
+                    for (let r = 0; r < size; r++) {
+                        let row = grid[r].filter(v => v);
+                        if (dir === 'right') row.reverse();
+                        for (let i = 0; i < row.length - 1; i++) {
+                            if (row[i] === row[i + 1]) { row[i] *= 2;
+                                score += row[i];
+                                row.splice(i + 1, 1); }
+                        }
+                        while (row.length < size) row.push(0);
+                        if (dir === 'right') row.reverse();
+                        grid[r] = row;
+                    }
+                } else {
+                    for (let c = 0; c < size; c++) {
+                        let col = grid.map(r => r[c]).filter(v => v);
+                        if (dir === 'down') col.reverse();
+                        for (let i = 0; i < col.length - 1; i++) {
+                            if (col[i] === col[i + 1]) { col[i] *= 2;
+                                score += col[i];
+                                col.splice(i + 1, 1); }
+                        }
+                        while (col.length < size) col.push(0);
+                        if (dir === 'down') col.reverse();
+                        for (let r = 0; r < size; r++) grid[r][c] = col[r];
+                    }
+                }
+                moved = JSON.stringify(oldGrid) !== JSON.stringify(grid);
+                if (moved) { addRandom();
+                    render(); }
+                if (grid.flat().includes(2048)) { gameOver = true;
+                    spawnConfetti(50);
+                    setTimeout(() => alert('🎉 2048! You win!'), 200); }
+                if (grid.flat().every(v => v) && !canMerge()) { gameOver = true;
+                    setTimeout(() => alert('Game Over!'), 200); }
+            }
+
+            function canMerge() {
+                for (let r = 0; r < size; r++)
+                    for (let c = 0; c < size; c++) {
+                        if (c < size - 1 && grid[r][c] === grid[r][c + 1]) return true;
+                        if (r < size - 1 && grid[r][c] === grid[r + 1][c]) return true;
+                    }
+                return false;
+            }
+            document.addEventListener('keydown', function kd(e) {
+                if (!running2048) return;
+                if (e.key === 'ArrowLeft') move('left');
+                if (e.key === 'ArrowRight') move('right');
+                if (e.key === 'ArrowUp') move('up');
+                if (e.key === 'ArrowDown') move('down');
+            });
+            let running2048 = true;
+            let touchStart2048 = { x: 0, y: 0 };
+            gridEl.addEventListener('touchstart', e => { touchStart2048 = { x: e.touches[0].clientX, y: e.touches[0]
+                        .clientY }; });
+            gridEl.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - touchStart2048.x;
+                const dy = e.changedTouches[0].clientY - touchStart2048.y;
+                if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'right' : 'left');
+                else move(dy > 0 ? 'down' : 'up');
+            });
+            document.getElementById('g2048Reset').addEventListener('click', init);
+            init();
+            activeGameCleanup = () => { running2048 = false;
+                gameOver = true; };
+        }
+
+        // 18. Space Shooter
+        function loadSpaceShooter(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="ssScore">0</span></p>
+              <canvas id="ssCanvas" width="300" height="400" style="background:#000;border-radius:10px;"></canvas>
+            </div>`;
+            const canvas = document.getElementById('ssCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('ssScore');
+            let shipX = 135,
+                bullets, enemies, score, running, animId;
+
+            function init() {
+                shipX = 135;
+                bullets = [];
+                enemies = [];
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                if (animId) cancelAnimationFrame(animId);
+                loop();
+            }
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, 300, 400);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillRect(shipX, 360, 30, 20);
+                ctx.fillStyle = '#ffe66d';
+                bullets.forEach(b => { ctx.fillRect(b.x, b.y, 4, 12);
+                    b.y -= 6; });
+                ctx.fillStyle = '#ff6b6b';
+                enemies.forEach(e => { ctx.fillRect(e.x, e.y, 25, 20);
+                    e.y += 2; });
+                bullets = bullets.filter(b => b.y > 0);
+                enemies = enemies.filter(e => {
+                    if (e.y > 400) return false;
+                    const hit = bullets.some(b => Math.abs(b.x - e.x) < 20 && Math.abs(b.y - e.y) < 18);
+                    if (hit) { score += 10;
+                        scoreEl.textContent = score;
+                        bullets = bullets.filter(b => !(Math.abs(b.x - e.x) < 20 && Math.abs(b.y - e.y) < 18));
+                        spawnConfetti(3); return false; }
+                    if (e.y > 340 && Math.abs(e.x - shipX) < 30) { running = false;
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '18px sans-serif';
+                        ctx.fillText('Game Over!', 85, 200); return false; }
+                    return true;
+                });
+                if (Math.random() < 0.03) enemies.push({ x: Math.random() * 275, y: -20 });
+                if (running) animId = requestAnimationFrame(loop);
+            }
+            function shoot() { if (running) bullets.push({ x: shipX + 13, y: 355 }); }
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                shipX = (e.clientX - rect.left) * (300 / rect.width) - 15;
+                shipX = Math.max(0, Math.min(270, shipX));
+            });
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                shipX = (e.touches[0].clientX - rect.left) * (300 / rect.width) - 15;
+                shipX = Math.max(0, Math.min(270, shipX));
+            }, { passive: false });
+            canvas.addEventListener('click', shoot);
+            canvas.addEventListener('touchstart', e => { e.preventDefault();
+                shoot(); });
+            init();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 19. Hangman
+        function loadHangman(body) {
+            const words = ['JAVASCRIPT', 'HANGMAN', 'COMPUTER', 'KEYBOARD', 'PROGRAM', 'DEVELOPER', 'INTERNET'];
+            let word, guessed, wrongs;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="hmWord">------</p>
+              <p>Wrong: <span id="hmWrong">0</span>/6</p>
+              <div id="hmLetters" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;max-width:300px;margin:0 auto;"></div>
+              <button id="hmNew">🔄 New Word</button>
+              <p class="result" id="hmResult"></p>
+            </div>`;
+            const wordEl = document.getElementById('hmWord');
+            const wrongEl = document.getElementById('hmWrong');
+            const lettersEl = document.getElementById('hmLetters');
+            const resultEl = document.getElementById('hmResult');
+
+            function init() {
+                word = words[Math.floor(Math.random() * words.length)];
+                guessed = new Set();
+                wrongs = 0;
+                wrongEl.textContent = '0';
+                resultEl.textContent = '';
+                updateDisplay();
+                renderLetters();
+            }
+
+            function updateDisplay() {
+                wordEl.textContent = word.split('').map(l => guessed.has(l) ? l : '_').join(' ');
+                if (word.split('').every(l => guessed.has(l))) { resultEl.textContent = '🎉 You saved him!';
+                    spawnConfetti(); }
+            }
+
+            function renderLetters() {
+                lettersEl.innerHTML = '';
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+                    const btn = document.createElement('button');
+                    btn.textContent = l;
+                    btn.style.cssText =
+                        'padding:6px 10px;border-radius:6px;border:1px solid #555;background:#1a1a3a;color:#fff;cursor:pointer;font-size:0.75rem;';
+                    if (guessed.has(l)) btn.style.opacity = '0.4';
+                    btn.addEventListener('click', () => {
+                        if (guessed.has(l) || resultEl.textContent) return;
+                        guessed.add(l);
+                        if (!word.includes(l)) wrongs++;
+                        wrongEl.textContent = wrongs;
+                        updateDisplay();
+                        renderLetters();
+                        if (wrongs >= 6) resultEl.textContent = `💀 Hangman! Word: ${word}`;
+                    });
+                    lettersEl.appendChild(btn);
+                });
+            }
+            document.getElementById('hmNew').addEventListener('click', init);
+            init();
+        }
+
+        // 20. Connect Four
+        function loadConnectFour(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="c4Status">Red's turn 🔴</p>
+              <div id="c4Grid" style="display:grid;grid-template-columns:repeat(7,42px);gap:4px;justify-content:center;background:#1a3a6a;padding:8px;border-radius:10px;"></div>
+              <button id="c4Reset">🔄 Restart</button>
+            </div>`;
+            const gridEl = document.getElementById('c4Grid');
+            const statusEl = document.getElementById('c4Status');
+            let board, currentPlayer, gameOver;
+            const rows = 6,
+                cols = 7;
+
+            function init() {
+                board = Array(rows).fill(null).map(() => Array(cols).fill(null));
+                currentPlayer = '🔴';
+                gameOver = false;
+                statusEl.textContent = "Red's turn 🔴";
+                render();
+            }
+
+            function render() {
+                gridEl.innerHTML = '';
+                for (let r = 0; r < rows; r++)
+                    for (let c = 0; c < cols; c++) {
+                        const cell = document.createElement('div');
+                        cell.style.cssText =
+                            'width:42px;height:42px;background:#0a0a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;';
+                        cell.textContent = board[r][c] || '';
+                        cell.addEventListener('click', () => dropPiece(c));
+                        gridEl.appendChild(cell);
+                    }
+            }
+
+            function dropPiece(col) {
+                if (gameOver) return;
+                for (let r = rows - 1; r >= 0; r--) {
+                    if (!board[r][col]) {
+                        board[r][col] = currentPlayer;
+                        render();
+                        if (checkWin(r, col)) { statusEl.textContent = `${currentPlayer} wins! 🎉`;
+                            gameOver = true;
+                            spawnConfetti(); return; }
+                        if (board.flat().every(v => v)) { statusEl.textContent = "It's a draw!";
+                            gameOver = true; return; }
+                        currentPlayer = currentPlayer === '🔴' ? '🟡' : '🔴';
+                        statusEl.textContent = `${currentPlayer==='🔴'?'Red':'Yellow'}'s turn ${currentPlayer}`;
+                        return;
+                    }
+                }
+            }
+
+            function checkWin(r, c) {
+                const dirs = [
+                    [0, 1],
+                    [1, 0],
+                    [1, 1],
+                    [1, -1]
+                ];
+                for (const [dr, dc] of dirs) {
+                    let count = 1;
+                    for (let i = 1; i < 4; i++) { if (board[r + dr * i] && board[r + dr * i][c + dc * i] ===
+                            currentPlayer) count++;
+                        else break; }
+                    for (let i = 1; i < 4; i++) { if (board[r - dr * i] && board[r - dr * i][c - dc * i] ===
+                            currentPlayer) count++;
+                        else break; }
+                    if (count >= 4) return true;
+                }
+                return false;
+            }
+            document.getElementById('c4Reset').addEventListener('click', init);
+            init();
+        }
+
+        // 21. Minesweeper (simplified 7x7, 8 mines)
+        function loadMinesweeper(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="msStatus">Mines: 8</p>
+              <div id="msGrid" style="display:grid;grid-template-columns:repeat(7,40px);gap:2px;justify-content:center;"></div>
+              <button id="msReset">🔄 Restart</button>
+            </div>`;
+            const gridEl = document.getElementById('msGrid');
+            const statusEl = document.getElementById('msStatus');
+            let board, revealed, mines, gameOver;
+            const size = 7,
+                totalMines = 8;
+
+            function init() {
+                board = Array(size).fill(null).map(() => Array(size).fill(0));
+                revealed = Array(size).fill(null).map(() => Array(size).fill(false));
+                mines = new Set();
+                gameOver = false;
+                statusEl.textContent = 'Mines: 8';
+                while (mines.size < totalMines) mines.add(Math.floor(Math.random() * size * size));
+                mines.forEach(idx => { const r = Math.floor(idx / size),
+                        c = idx % size;
+                    board[r][c] = -1; });
+                for (let r = 0; r < size; r++)
+                    for (let c = 0; c < size; c++) {
+                        if (board[r][c] === -1) continue;
+                        let count = 0;
+                        for (let dr = -1; dr <= 1; dr++)
+                            for (let dc = -1; dc <= 1; dc++) {
+                                const nr = r + dr,
+                                    nc = c + dc;
+                                if (nr >= 0 && nr < size && nc >= 0 && nc < size && board[nr][nc] === -1) count++;
+                            }
+                        board[r][c] = count;
+                    }
+                render();
+            }
+
+            function render() {
+                gridEl.innerHTML = '';
+                for (let r = 0; r < size; r++)
+                    for (let c = 0; c < size; c++) {
+                        const cell = document.createElement('div');
+                        cell.style.cssText =
+                            'width:40px;height:40px;background:#1a1a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;cursor:pointer;border:1px solid #444;';
+                        if (revealed[r][c]) {
+                            cell.style.background = '#2a2a5a';
+                            if (board[r][c] === -1) cell.textContent = '💣';
+                            else if (board[r][c] > 0) cell.textContent = board[r][c];
+                        }
+                        cell.addEventListener('click', () => reveal(r, c));
+                        gridEl.appendChild(cell);
+                    }
+            }
+
+            function reveal(r, c) {
+                if (gameOver || revealed[r][c]) return;
+                revealed[r][c] = true;
+                if (board[r][c] === -1) { gameOver = true;
+                    statusEl.textContent = '💥 BOOM! Game Over';
+                    revealed.forEach((row, ri) => row.forEach((_, ci) => { if (board[ri][ci] === -1) revealed[ri][ci] =
+                            true; }));
+                    render(); return; }
+                if (board[r][c] === 0) {
+                    for (let dr = -1; dr <= 1; dr++)
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr,
+                                nc = c + dc;
+                            if (nr >= 0 && nr < size && nc >= 0 && nc < size) reveal(nr, nc);
+                        }
+                }
+                render();
+                const allRevealed = board.flat().every((v, i) => v === -1 || revealed[Math.floor(i / size)][i % size]);
+                if (allRevealed && !gameOver) { statusEl.textContent = '🎉 You cleared the mines!';
+                    gameOver = true;
+                    spawnConfetti(); }
+            }
+            document.getElementById('msReset').addEventListener('click', init);
+            init();
+        }
+
+        // 22. Blackjack (simplified)
+        function loadBlackjack(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Your Cards: <span id="bjPlayer"></span> (<span id="bjPlayerVal">0</span>)</p>
+              <p>Dealer: <span id="bjDealer"></span> (<span id="bjDealerVal">0</span>)</p>
+              <button id="bjHit">🃏 Hit</button>
+              <button id="bjStand">✋ Stand</button>
+              <button id="bjNew">🔄 New Hand</button>
+              <p class="result" id="bjResult"></p>
+            </div>`;
+            let deck, playerCards, dealerCards, gameOver;
+
+            function freshDeck() {
+                const suits = ['♥', '♦', '♣', '♠'];
+                const vals = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+                const d = [];
+                suits.forEach(s => vals.forEach(v => d.push({ v, s })));
+                return d.sort(() => Math.random() - 0.5);
+            }
+
+            function cardVal(c) {
+                if (['J', 'Q', 'K'].includes(c.v)) return 10;
+                if (c.v === 'A') return 11;
+                return parseInt(c.v);
+            }
+
+            function handVal(cards) {
+                let total = cards.reduce((s, c) => s + cardVal(c), 0);
+                let aces = cards.filter(c => c.v === 'A').length;
+                while (total > 21 && aces > 0) { total -= 10;
+                    aces--; }
+                return total;
+            }
+
+            function update() {
+                document.getElementById('bjPlayer').textContent = playerCards.map(c => c.v + c.s).join(' ');
+                document.getElementById('bjPlayerVal').textContent = handVal(playerCards);
+                document.getElementById('bjDealer').textContent = gameOver ? dealerCards.map(c => c.v + c.s).join(' ') :
+                    dealerCards[0].v + dealerCards[0].s + ' ??';
+                document.getElementById('bjDealerVal').textContent = gameOver ? handVal(dealerCards) : cardVal(
+                    dealerCards[0]);
+            }
+
+            function endGame(msg) { gameOver = true;
+                update();
+                document.getElementById('bjResult').textContent = msg; if (msg.includes('Win')) spawnConfetti(); }
+
+            function init() {
+                deck = freshDeck();
+                playerCards = [deck.pop(), deck.pop()];
+                dealerCards = [deck.pop(), deck.pop()];
+                gameOver = false;
+                document.getElementById('bjResult').textContent = '';
+                update();
+                if (handVal(playerCards) === 21) endGame('🃏 Blackjack! You Win!');
+            }
+            document.getElementById('bjHit').addEventListener('click', () => {
+                if (gameOver) return;
+                playerCards.push(deck.pop());
+                update();
+                if (handVal(playerCards) > 21) endGame('💥 Bust! Dealer wins.');
+            });
+            document.getElementById('bjStand').addEventListener('click', () => {
+                if (gameOver) return;
+                while (handVal(dealerCards) < 17) dealerCards.push(deck.pop());
+                const pv = handVal(playerCards),
+                    dv = handVal(dealerCards);
+                if (dv > 21) endGame('Dealer busts! You Win! 🎉');
+                else if (pv > dv) endGame('You Win! 🎉');
+                else if (pv < dv) endGame('Dealer wins.');
+                else endGame("It's a push!");
+            });
+            document.getElementById('bjNew').addEventListener('click', init);
+            init();
+        }
+
+        // 23. Roulette
+        function loadRoulette(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" id="roulResult">Spin the wheel!</p>
+              <div style="font-size:4rem;" id="roulWheel">🎡</div>
+              <button id="roulSpin">🎡 Spin</button>
+              <p>Bet on: <button class="roulBet" data-bet="red">🔴 Red</button> <button class="roulBet" data-bet="black">⚫ Black</button> <button class="roulBet" data-bet="green">🟢 Green</button></p>
+            </div>`;
+            let bet = 'red';
+            document.querySelectorAll('.roulBet').forEach(b => b.addEventListener('click', () => { bet = b.dataset.bet;
+                document.getElementById('roulResult').textContent = `Bet: ${bet.toUpperCase()}`; }));
+            document.getElementById('roulSpin').addEventListener('click', () => {
+                const num = Math.floor(Math.random() * 37);
+                let color = num === 0 ? 'green' : (num % 2 === 0 ? 'red' : 'black');
+                const wheelEl = document.getElementById('roulWheel');
+                wheelEl.style.transform = 'rotate(720deg)';
+                wheelEl.style.transition = 'transform 1.5s ease-out';
+                setTimeout(() => { wheelEl.style.transform = 'rotate(0deg)';
+                    wheelEl.style.transition = 'none'; }, 1600);
+                document.getElementById('roulResult').textContent =
+                    `Number: ${num} (${color}) — You ${bet===color?'WIN! 🎉':'lose.'}`;
+                if (bet === color) spawnConfetti(25);
+            });
+        }
+
+        // 24. Slot Machine
+        function loadSlotMachine(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:3rem;letter-spacing:10px;" id="slotReels">🍒🍒🍒</p>
+              <button id="slotSpin">🎰 Spin</button>
+              <p class="result" id="slotResult"></p>
+            </div>`;
+            const symbols = ['🍒', '🍋', '🍇', '⭐', '💎', '🔔', '7️⃣'];
+            document.getElementById('slotSpin').addEventListener('click', () => {
+                const reels = [symbols[Math.floor(Math.random() * 7)], symbols[Math.floor(Math.random() * 7)],
+                    symbols[Math.floor(Math.random() * 7)]
+                ];
+                document.getElementById('slotReels').textContent = reels.join('');
+                if (reels[0] === reels[1] && reels[1] === reels[2]) {
+                    document.getElementById('slotResult').textContent = '🎉 JACKPOT!';
+                    spawnConfetti(40);
+                } else if (reels[0] === reels[1] || reels[1] === reels[2]) document.getElementById('slotResult')
+                    .textContent = 'Almost! Two matched.';
+                else document.getElementById('slotResult').textContent = 'Try again!';
+            });
+        }
+
+        // 25. Bingo
+        function loadBingo(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Your Card:</p>
+              <div id="bingoCard" style="display:grid;grid-template-columns:repeat(5,45px);gap:3px;justify-content:center;"></div>
+              <button id="bingoDraw">🎱 Draw Number</button>
+              <p class="result" id="bingoResult"></p>
+              <p>Drawn: <span id="bingoDrawn">-</span></p>
+            </div>`;
+            const cardEl = document.getElementById('bingoCard');
+            const resultEl = document.getElementById('bingoResult');
+            const drawnEl = document.getElementById('bingoDrawn');
+            let card, marked, drawn;
+
+            function init() {
+                const nums = [];
+                for (let i = 1; i <= 25; i++) nums.push(i);
+                nums.sort(() => Math.random() - 0.5);
+                card = [];
+                for (let i = 0; i < 5; i++) card.push(nums.slice(i * 5, i * 5 + 5));
+                marked = Array(5).fill(null).map(() => Array(5).fill(false));
+                marked[2][2] = true;
+                drawn = new Set();
+                resultEl.textContent = '';
+                drawnEl.textContent = '-';
+                renderCard();
+            }
+
+            function renderCard() {
+                cardEl.innerHTML = '';
+                for (let r = 0; r < 5; r++)
+                    for (let c = 0; c < 5; c++) {
+                        const cell = document.createElement('div');
+                        cell.style.cssText =
+                            'width:45px;height:45px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;';
+                        cell.style.background = marked[r][c] ? '#4ecdc4' : '#1a1a3a';
+                        cell.style.color = marked[r][c] ? '#000' : '#fff';
+                        cell.textContent = r === 2 && c === 2 ? '⭐' : card[r][c];
+                        cardEl.appendChild(cell);
+                    }
+            }
+            document.getElementById('bingoDraw').addEventListener('click', () => {
+                if (drawn.size >= 25) return;
+                let num;
+                do { num = Math.floor(Math.random() * 25) + 1; } while (drawn.has(num));
+                drawn.add(num);
+                drawnEl.textContent = [...drawn].slice(-5).join(', ');
+                for (let r = 0; r < 5; r++)
+                    for (let c = 0; c < 5; c++)
+                        if (card[r][c] === num) marked[r][c] = true;
+                renderCard();
+                const bingo = marked.some(row => row.every(v => v)) || [0, 1, 2, 3, 4].some(c => marked.every(
+                    row => row[c]));
+                if (bingo) { resultEl.textContent = '🎉 BINGO!';
+                    spawnConfetti(35); }
+            });
+            init();
+        }
+
+        // 26. Color Match
+        function loadColorMatch(body) {
+            const targetColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Match this color:</p>
+              <div style="width:100px;height:100px;background:${targetColor};border-radius:15px;margin:0 auto;"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px;" id="cmOptions"></div>
+              <p class="result" id="cmResult"></p>
+            </div>`;
+            const optionsEl = document.getElementById('cmOptions');
+            const resultEl = document.getElementById('cmResult');
+            const options = [targetColor];
+            while (options.length < 6) {
+                const c = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                if (!options.includes(c)) options.push(c);
+            }
+            options.sort(() => Math.random() - 0.5);
+            options.forEach(c => {
+                const btn = document.createElement('div');
+                btn.style.cssText =
+                    `width:55px;height:55px;background:${c};border-radius:10px;cursor:pointer;border:3px solid transparent;`;
+                btn.addEventListener('click', () => {
+                    if (c === targetColor) { resultEl.textContent = '✅ Correct!';
+                        spawnConfetti(); } else resultEl.textContent = '❌ Try again!';
+                });
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        // 27. Click Counter
+        function loadClickCounter(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" style="font-size:3rem;" id="ccCount">0</p>
+              <button id="ccBtn" style="font-size:2rem;padding:20px 40px;">👆 CLICK!</button>
+              <button id="ccReset">🔄 Reset</button>
+              <p>Time: <span id="ccTime">10</span>s</p>
+            </div>`;
+            let count = 0,
+                time = 10,
+                interval, running = false;
+            const countEl = document.getElementById('ccCount');
+            const timeEl = document.getElementById('ccTime');
+            const btn = document.getElementById('ccBtn');
+            btn.addEventListener('click', () => {
+                if (!running) {
+                    running = true;
+                    count = 0;
+                    time = 10;
+                    countEl.textContent = '0';
+                    timeEl.textContent = '10';
+                    interval = setInterval(() => {
+                        time--;
+                        timeEl.textContent = time;
+                        if (time <= 0) { clearInterval(interval);
+                            running = false;
+                            btn.textContent = '👆 CLICK!';
+                            alert(`⏰ Time's up! Clicks: ${count}`); }
+                    }, 1000);
+                }
+                if (running) { count++;
+                    countEl.textContent = count;
+                    btn.textContent = '👆 TAP!'; }
+            });
+            document.getElementById('ccReset').addEventListener('click', () => { clearInterval(interval);
+                running = false;
+                count = 0;
+                time = 10;
+                countEl.textContent = '0';
+                timeEl.textContent = '10';
+                btn.textContent = '👆 CLICK!'; });
+            activeGameCleanup = () => { clearInterval(interval); };
+        }
+
+        // 28. Bubble Pop
+        function loadBubblePop(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="bpScore">0</span></p>
+              <canvas id="bpCanvas" width="300" height="350" style="background:#1a1a4a;border-radius:10px;"></canvas>
+            </div>`;
+            const canvas = document.getElementById('bpCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('bpScore');
+            let bubbles, score, running, animId;
+
+            function init() {
+                bubbles = [];
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                if (animId) cancelAnimationFrame(animId);
+                for (let i = 0; i < 8; i++) bubbles.push(spawnBubble());
+                loop();
+            }
+
+            function spawnBubble() {
+                return { x: Math.random() * 260 + 20, y: Math.random() * 300 + 30, r: Math.random() * 20 + 12, color: [
+                        '#ff6b6b', '#4ecdc4', '#ffe66d', '#a29bfe', '#fd79a8'
+                    ][Math.floor(Math.random() * 5)], vy: -(Math.random() * 1 + 0.3) };
+            }
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#1a1a4a';
+                ctx.fillRect(0, 0, 300, 350);
+                bubbles.forEach(b => {
+                    ctx.fillStyle = b.color;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    b.y += b.vy;
+                    if (b.y < -30) { b.y = 370;
+                        b.x = Math.random() * 260 + 20; }
+                });
+                if (bubbles.length < 8 && Math.random() < 0.05) bubbles.push(spawnBubble());
+                animId = requestAnimationFrame(loop);
+            }
+            canvas.addEventListener('click', e => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = (e.clientX - rect.left) * (300 / rect.width);
+                const my = (e.clientY - rect.top) * (350 / rect.height);
+                bubbles = bubbles.filter(b => {
+                    const dist = Math.hypot(mx - b.x, my - b.y);
+                    if (dist < b.r) { score += 5;
+                        scoreEl.textContent = score;
+                        spawnConfetti(3); return false; }
+                    return true;
+                });
+            });
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const mx = (e.touches[0].clientX - rect.left) * (300 / rect.width);
+                const my = (e.touches[0].clientY - rect.top) * (350 / rect.height);
+                bubbles = bubbles.filter(b => {
+                    const dist = Math.hypot(mx - b.x, my - b.y);
+                    if (dist < b.r) { score += 5;
+                        scoreEl.textContent = score;
+                        spawnConfetti(3); return false; }
+                    return true;
+                });
+            });
+            init();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 29. Pattern Memory
+        function loadPatternMemory(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Level: <span id="pmLevel">1</span></p>
+              <div id="pmGrid" style="display:grid;grid-template-columns:repeat(3,70px);gap:6px;justify-content:center;"></div>
+              <p class="result" id="pmResult"></p>
+            </div>`;
+            const gridEl = document.getElementById('pmGrid');
+            const levelEl = document.getElementById('pmLevel');
+            const resultEl = document.getElementById('pmResult');
+            let pattern, playerPat, level, showing;
+
+            function init() {
+                pattern = [];
+                playerPat = [];
+                level = 1;
+                showing = false;
+                levelEl.textContent = '1';
+                resultEl.textContent = '';
+                gridEl.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:70px;height:70px;background:#1a1a3a;border-radius:10px;cursor:pointer;border:2px solid #444;transition:all 0.3s;';
+                    cell.addEventListener('click', () => {
+                        if (showing) return;
+                        cell.style.background = '#4ecdc4';
+                        setTimeout(() => cell.style.background = '#1a1a3a', 250);
+                        playerPat.push(i);
+                        if (playerPat[playerPat.length - 1] !== pattern[playerPat.length - 1]) {
+                            resultEl.textContent = `❌ Wrong! Level: ${level}`;
+                            showing = true;
+                            return;
+                        }
+                        if (playerPat.length === pattern.length) {
+                            level++;
+                            levelEl.textContent = level;
+                            playerPat = [];
+                            spawnConfetti(8);
+                            setTimeout(addToPattern, 700);
+                        }
+                    });
+                    gridEl.appendChild(cell);
+                }
+                setTimeout(addToPattern, 500);
+            }
+
+            function addToPattern() {
+                pattern.push(Math.floor(Math.random() * 9));
+                playerPat = [];
+                showing = true;
+                const cells = gridEl.children;
+                pattern.forEach((idx, delay) => {
+                    setTimeout(() => {
+                        cells[idx].style.background = '#ffe66d';
+                        setTimeout(() => cells[idx].style.background = '#1a1a3a', 400);
+                    }, delay * 500 + 200);
+                });
+                setTimeout(() => { showing = false; }, pattern.length * 500 + 400);
+            }
+            init();
+            activeGameCleanup = () => { showing = true; };
+        }
+
+        // 30. Speed Math
+        function loadSpeedMath(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="smScore">0</span> | Time: <span id="smTime">30</span>s</p>
+              <p style="font-size:1.5rem;color:#fff;" id="smQuestion">--</p>
+              <input type="number" id="smInput" placeholder="Answer">
+              <button id="smStart">▶️ Start</button>
+            </div>`;
+            let score, time, interval, answer, running;
+            const scoreEl = document.getElementById('smScore');
+            const timeEl = document.getElementById('smTime');
+            const qEl = document.getElementById('smQuestion');
+            const inputEl = document.getElementById('smInput');
+            document.getElementById('smStart').addEventListener('click', () => {
+                score = 0;
+                time = 30;
+                running = true;
+                scoreEl.textContent = '0';
+                timeEl.textContent = '30';
+                if (interval) clearInterval(interval);
+                interval = setInterval(() => { time--;
+                    timeEl.textContent = time; if (time <= 0) { clearInterval(interval);
+                        running = false;
+                        alert(`⏰ Score: ${score}`); } }, 1000);
+                newQ();
+                inputEl.focus();
+            });
+
+            function newQ() {
+                const a = Math.floor(Math.random() * 30) + 1;
+                const b = Math.floor(Math.random() * 30) + 1;
+                const op = ['+', '-', '×'][Math.floor(Math.random() * 3)];
+                if (op === '+') answer = a + b;
+                if (op === '-') answer = Math.max(a, b) - Math.min(a, b);
+                if (op === '×') answer = a * b;
+                qEl.textContent = op === '-' ? `${Math.max(a,b)} - ${Math.min(a,b)} = ?` : `${a} ${op} ${b} = ?`;
+                inputEl.value = '';
+            }
+            inputEl.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && running) {
+                    if (parseInt(inputEl.value) === answer) { score++;
+                        scoreEl.textContent = score;
+                        spawnConfetti(3); }
+                    newQ();
+                }
+            });
+            activeGameCleanup = () => { clearInterval(interval);
+                running = false; };
+        }
+
+        // 31. Anagram
+        function loadAnagram(body) {
+            const words = ['LISTEN', 'SILENT', 'HEART', 'EARTH', 'ANGEL', 'GLEAN', 'STONE', 'NOTES'];
+            let word;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:1.5rem;color:#fff;" id="anaLetters">------</p>
+              <input type="text" id="anaInput" placeholder="Find the anagram">
+              <button id="anaCheck">✅ Check</button>
+              <button id="anaNew">🔄 New</button>
+              <p class="result" id="anaResult"></p>
+            </div>`;
+            const lettersEl = document.getElementById('anaLetters');
+            const resultEl = document.getElementById('anaResult');
+            const inputEl = document.getElementById('anaInput');
+
+            function newWord() {
+                word = words[Math.floor(Math.random() * words.length)];
+                const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+                lettersEl.textContent = scrambled;
+                resultEl.textContent = '';
+                inputEl.value = '';
+            }
+            document.getElementById('anaCheck').addEventListener('click', () => {
+                if (inputEl.value.toUpperCase() === word) { resultEl.textContent = '✅ Found it!';
+                    spawnConfetti(); } else if (inputEl.value.toUpperCase().split('').sort().join('') === word.split('')
+                    .sort().join('')) resultEl.textContent = '⚠️ Valid anagram but not the target word!';
+                else resultEl.textContent = '❌ Not an anagram.';
+            });
+            document.getElementById('anaNew').addEventListener('click', newWord);
+            newWord();
+        }
+
+        // 32. Wordle Lite
+        function loadWordleLite(body) {
+            const target = ['APPLE', 'GRAPE', 'MANGO', 'PEACH', 'LEMON', 'CHERRY', 'MELON'][Math.floor(Math.random() * 7)];
+            let attempts = 0;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Guess the 5-letter fruit!</p>
+              <input type="text" id="wlInput" maxlength="5" placeholder="5 letters">
+              <button id="wlGuess">Guess</button>
+              <div id="wlResults" style="margin-top:10px;"></div>
+              <p class="result" id="wlResult"></p>
+            </div>`;
+            const resultsEl = document.getElementById('wlResults');
+            const resultEl = document.getElementById('wlResult');
+            document.getElementById('wlGuess').addEventListener('click', () => {
+                const guess = document.getElementById('wlInput').value.toUpperCase();
+                if (guess.length !== 5) return;
+                attempts++;
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;gap:3px;justify-content:center;margin:3px 0;';
+                guess.split('').forEach((l, i) => {
+                    const box = document.createElement('span');
+                    box.textContent = l;
+                    box.style.cssText =
+                        'display:inline-block;width:30px;height:30px;line-height:30px;border-radius:5px;font-weight:700;';
+                    if (target[i] === l) box.style.background = '#2ecc71';
+                    else if (target.includes(l)) box.style.background = '#f39c12';
+                    else box.style.background = '#555';
+                    row.appendChild(box);
+                });
+                resultsEl.appendChild(row);
+                if (guess === target) { resultEl.textContent = `🎉 Solved in ${attempts} attempts!`;
+                    spawnConfetti(); } else if (attempts >= 6) resultEl.textContent = `Game over! Word: ${target}`;
+                document.getElementById('wlInput').value = '';
+            });
+        }
+
+        // 33. Card War
+        function loadCardWar(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Your Card: <span id="cwPlayer" style="font-size:2rem;">🃏</span></p>
+              <p>AI Card: <span id="cwAI" style="font-size:2rem;">🃏</span></p>
+              <button id="cwDraw">⚔️ Draw!</button>
+              <p class="result" id="cwResult"></p>
+            </div>`;
+            const vals = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            document.getElementById('cwDraw').addEventListener('click', () => {
+                const p = vals[Math.floor(Math.random() * 13)];
+                const a = vals[Math.floor(Math.random() * 13)];
+                document.getElementById('cwPlayer').textContent = p;
+                document.getElementById('cwAI').textContent = a;
+                const pi = vals.indexOf(p),
+                    ai = vals.indexOf(a);
+                if (pi > ai) { document.getElementById('cwResult').textContent = 'You win this round! 🎉';
+                    spawnConfetti(10); } else if (pi < ai) document.getElementById('cwResult').textContent =
+                    'AI wins.';
+                else document.getElementById('cwResult').textContent = 'War! Tie!';
+            });
+        }
+
+        // 34. Maze Runner
+        function loadMazeRunner(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <canvas id="mazeCanvas" width="280" height="280" style="background:#1a1a3a;border-radius:10px;"></canvas>
+              <p style="font-size:0.7rem;color:#888;">Arrow keys or swipe to move</p>
+              <button id="mazeReset">🔄 New Maze</button>
+            </div>`;
+            const canvas = document.getElementById('mazeCanvas');
+            const ctx = canvas.getContext('2d');
+            const cellSize = 35;
+            const cols = 8,
+                rows = 8;
+            let player, exit, walls, running;
+            const mazeLayout = [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 1, 0],
+                [0, 1, 0, 1, 0, 1, 0, 0],
+                [0, 1, 0, 0, 0, 1, 1, 0],
+                [0, 1, 1, 1, 0, 0, 0, 0],
+                [0, 0, 0, 1, 1, 1, 1, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0]
+            ];
+
+            function init() {
+                player = { x: 0, y: 0 };
+                exit = { x: 7, y: 7 };
+                walls = [];
+                for (let r = 0; r < rows; r++)
+                    for (let c = 0; c < cols; c++)
+                        if (mazeLayout[r] && mazeLayout[r][c] === 1) walls.push({ x: c, y: r });
+                running = true;
+                draw();
+            }
+
+            function draw() {
+                ctx.fillStyle = '#1a1a3a';
+                ctx.fillRect(0, 0, 280, 280);
+                ctx.fillStyle = '#555';
+                walls.forEach(w => ctx.fillRect(w.x * cellSize, w.y * cellSize, cellSize - 2, cellSize - 2));
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(exit.x * cellSize, exit.y * cellSize, cellSize - 2, cellSize - 2);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillRect(player.x * cellSize + 3, player.y * cellSize + 3, cellSize - 8, cellSize - 8);
+                if (player.x === exit.x && player.y === exit.y && running) { running = false;
+                    spawnConfetti(30);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText('You escaped!', 80, 140); }
+            }
+
+            function move(dx, dy) {
+                if (!running) return;
+                const nx = player.x + dx,
+                    ny = player.y + dy;
+                if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !walls.some(w => w.x === nx && w.y === ny)) {
+                    player.x = nx;
+                    player.y = ny;
+                    draw();
+                }
+            }
+            document.addEventListener('keydown', function kd(e) {
+                if (!running) return;
+                if (e.key === 'ArrowUp') move(0, -1);
+                if (e.key === 'ArrowDown') move(0, 1);
+                if (e.key === 'ArrowLeft') move(-1, 0);
+                if (e.key === 'ArrowRight') move(1, 0);
+            });
+            let touchStartM = { x: 0, y: 0 };
+            canvas.addEventListener('touchstart', e => { touchStartM = { x: e.touches[0].clientX, y: e.touches[0]
+                        .clientY }; });
+            canvas.addEventListener('touchend', e => {
+                const dx = e.changedTouches[0].clientX - touchStartM.x;
+                const dy = e.changedTouches[0].clientY - touchStartM.y;
+                if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 1 : -1, 0);
+                else move(0, dy > 0 ? 1 : -1);
+            });
+            document.getElementById('mazeReset').addEventListener('click', init);
+            init();
+            activeGameCleanup = () => { running = false; };
+        }
+
+        // 35. Catch Falling
+        function loadCatchFalling(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="cfScore">0</span></p>
+              <canvas id="cfCanvas" width="300" height="350" style="background:#1a1a3a;border-radius:10px;"></canvas>
+            </div>`;
+            const canvas = document.getElementById('cfCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('cfScore');
+            let basketX = 120,
+                items, score, running, animId;
+
+            function init() {
+                basketX = 120;
+                items = [];
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                if (animId) cancelAnimationFrame(animId);
+                loop();
+            }
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#1a1a3a';
+                ctx.fillRect(0, 0, 300, 350);
+                ctx.fillStyle = '#ffe66d';
+                ctx.fillRect(basketX, 325, 50, 15);
+                ctx.fillStyle = '#4ecdc4';
+                items.forEach(it => { ctx.fillRect(it.x, it.y, 12, 12);
+                    it.y += 3; });
+                if (Math.random() < 0.04) items.push({ x: Math.random() * 288, y: -15 });
+                items = items.filter(it => {
+                    if (it.y > 320 && it.y < 340 && it.x > basketX - 10 && it.x < basketX + 55) { score += 5;
+                        scoreEl.textContent = score;
+                        spawnConfetti(2); return false; }
+                    return it.y < 350;
+                });
+                if (running) animId = requestAnimationFrame(loop);
+            }
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                basketX = (e.clientX - rect.left) * (300 / rect.width) - 25;
+                basketX = Math.max(0, Math.min(250, basketX));
+            });
+            canvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                basketX = (e.touches[0].clientX - rect.left) * (300 / rect.width) - 25;
+                basketX = Math.max(0, Math.min(250, basketX));
+            }, { passive: false });
+            init();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 36. Aim Trainer
+        function loadAimTrainer(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Hits: <span id="atHits">0</span> | Time: <span id="atTime">15</span>s</p>
+              <canvas id="atCanvas" width="300" height="300" style="background:#1a1a3a;border-radius:10px;cursor:crosshair;"></canvas>
+            </div>`;
+            const canvas = document.getElementById('atCanvas');
+            const ctx = canvas.getContext('2d');
+            const hitsEl = document.getElementById('atHits');
+            const timeEl = document.getElementById('atTime');
+            let target, hits, time, interval, running;
+
+            function init() {
+                hits = 0;
+                time = 15;
+                running = true;
+                hitsEl.textContent = '0';
+                timeEl.textContent = '15';
+                spawnTarget();
+                if (interval) clearInterval(interval);
+                interval = setInterval(() => { time--;
+                    timeEl.textContent = time; if (time <= 0) { clearInterval(interval);
+                        running = false;
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '18px sans-serif';
+                        ctx.fillText('Done!', 120, 150); } }, 1000);
+                draw();
+            }
+
+            function spawnTarget() { target = { x: Math.random() * 250 + 25, y: Math.random() * 250 + 25, r: 18 }; }
+
+            function draw() {
+                if (!running) return;
+                ctx.fillStyle = '#1a1a3a';
+                ctx.fillRect(0, 0, 300, 300);
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.r / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            canvas.addEventListener('click', e => {
+                if (!running) return;
+                const rect = canvas.getBoundingClientRect();
+                const mx = (e.clientX - rect.left) * (300 / rect.width);
+                const my = (e.clientY - rect.top) * (300 / rect.height);
+                if (Math.hypot(mx - target.x, my - target.y) < target.r) { hits++;
+                    hitsEl.textContent = hits;
+                    spawnConfetti(3);
+                    spawnTarget(); }
+                draw();
+            });
+            init();
+            activeGameCleanup = () => { clearInterval(interval);
+                running = false; };
+        }
+
+        // 37. Quick Tap
+        function loadQuickTap(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Taps: <span id="qtTaps">0</span> in <span id="qtTime">5</span>s</p>
+              <button id="qtBtn" style="font-size:2rem;padding:30px 50px;">👆 TAP!</button>
+            </div>`;
+            let taps, time, interval, running;
+            const tapsEl = document.getElementById('qtTaps');
+            const timeEl = document.getElementById('qtTime');
+            const btn = document.getElementById('qtBtn');
+            btn.addEventListener('click', () => {
+                if (!running) {
+                    taps = 0;
+                    time = 5;
+                    running = true;
+                    tapsEl.textContent = '0';
+                    timeEl.textContent = '5';
+                    interval = setInterval(() => { time--;
+                        timeEl.textContent = time; if (time <= 0) { clearInterval(interval);
+                            running = false;
+                            alert(`🏁 ${taps} taps in 5 seconds!`); } }, 1000);
+                }
+                if (running) { taps++;
+                    tapsEl.textContent = taps; }
+            });
+            activeGameCleanup = () => { clearInterval(interval); };
+        }
+
+        // 38. Spin Wheel
+        function loadSpinWheel(body) {
+            const prizes = ['🎁 Prize', '🍀 Lucky', '💎 Jackpot', '😢 Lose', '🪙 Coin', '⭐ Star', '💩 Nothing', '🎉 Bonus'];
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:3rem;" id="swResult">🎡</p>
+              <button id="swSpin">🎡 Spin the Wheel</button>
+              <p class="result" id="swText"></p>
+            </div>`;
+            document.getElementById('swSpin').addEventListener('click', () => {
+                const prize = prizes[Math.floor(Math.random() * prizes.length)];
+                document.getElementById('swResult').textContent = prize.split(' ')[0];
+                document.getElementById('swText').textContent = `You got: ${prize}`;
+                if (prize.includes('Jackpot') || prize.includes('Bonus')) spawnConfetti(30);
+            });
+        }
+
+        // 39. Higher or Lower
+        function loadHigherLower(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Current: <span id="hlCurrent" style="font-size:2rem;">?</span></p>
+              <button class="hlBtn" data-choice="higher">📈 Higher</button>
+              <button class="hlBtn" data-choice="lower">📉 Lower</button>
+              <p class="score">Score: <span id="hlScore">0</span></p>
+              <button id="hlNew">🔄 New Game</button>
+            </div>`;
+            let current, score;
+            function newRound() { current = Math.floor(Math.random() * 50) + 1;
+                document.getElementById('hlCurrent').textContent = current; }
+            document.querySelectorAll('.hlBtn').forEach(b => b.addEventListener('click', function() {
+                const choice = this.dataset.choice;
+                const next = Math.floor(Math.random() * 50) + 1;
+                if ((choice === 'higher' && next >= current) || (choice === 'lower' && next <= current)) {
+                    score++;
+                    document.getElementById('hlScore').textContent = score;
+                    spawnConfetti(5);
+                } else alert(`Wrong! Number was ${next}. Final score: ${score}`);
+                current = next;
+                document.getElementById('hlCurrent').textContent = current;
+            }));
+            document.getElementById('hlNew').addEventListener('click', () => { score = 0;
+                document.getElementById('hlScore').textContent = '0';
+                newRound(); });
+            score = 0;
+            newRound();
+        }
+
+        // 40. Trivia Quiz
+        function loadTriviaQuiz(body) {
+            const questions = [
+                { q: 'What is the capital of France?', a: 'Paris' }, { q: 'How many continents are there?', a: '7' },
+                { q: 'What planet is known as the Red Planet?', a: 'Mars' }, { q: 'What is 5 × 6?', a: '30' },
+                { q: 'Who wrote Romeo and Juliet?', a: 'Shakespeare' }
+            ];
+            let q, score = 0,
+                total = 0;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="tqScore">0</span>/<span id="tqTotal">0</span></p>
+              <p style="color:#fff;" id="tqQ">--</p>
+              <input type="text" id="tqInput" placeholder="Your answer">
+              <button id="tqSubmit">✅ Submit</button>
+              <p class="result" id="tqResult"></p>
+            </div>`;
+            const qEl = document.getElementById('tqQ');
+            const scoreEl = document.getElementById('tqScore');
+            const totalEl = document.getElementById('tqTotal');
+            const resultEl = document.getElementById('tqResult');
+
+            function newQ() { q = questions[Math.floor(Math.random() * questions.length)];
+                qEl.textContent = q.q;
+                document.getElementById('tqInput').value = ''; }
+            document.getElementById('tqSubmit').addEventListener('click', () => {
+                total++;
+                totalEl.textContent = total;
+                if (document.getElementById('tqInput').value.toLowerCase().trim() === q.a.toLowerCase()) { score++;
+                    scoreEl.textContent = score;
+                    resultEl.textContent = '✅ Correct!';
+                    spawnConfetti(5); } else resultEl.textContent = `❌ Answer: ${q.a}`;
+                newQ();
+            });
+            newQ();
+        }
+
+        // 41. Word Search (simplified)
+        function loadWordSearch(body) {
+            const words = ['CAT', 'DOG', 'SUN', 'MOON', 'STAR'];
+            const grid = [
+                ['C', 'A', 'T', 'X', 'Y'],
+                ['D', 'O', 'G', 'Z', 'W'],
+                ['S', 'U', 'N', 'P', 'Q'],
+                ['M', 'O', 'O', 'N', 'R'],
+                ['S', 'T', 'A', 'R', 'L']
+            ];
+            let found = new Set();
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Find: ${words.join(', ')}</p>
+              <div id="wsGrid" style="display:grid;grid-template-columns:repeat(5,45px);gap:2px;justify-content:center;"></div>
+              <p class="result" id="wsFindResult"></p>
+            </div>`;
+            const gridEl = document.getElementById('wsGrid');
+            const resultEl = document.getElementById('wsFindResult');
+            grid.forEach((row, r) => row.forEach((letter, c) => {
+                const cell = document.createElement('div');
+                cell.style.cssText =
+                    'width:45px;height:45px;background:#1a1a3a;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;border:1px solid #444;';
+                cell.textContent = letter;
+                cell.addEventListener('click', () => {
+                    cell.style.background = '#4ecdc4';
+                    cell.style.color = '#000';
+                    found.add(`${r},${c}`);
+                    if (found.size >= 15) { resultEl.textContent = '🎉 All found!';
+                        spawnConfetti(); }
+                });
+                gridEl.appendChild(cell);
+            }));
+        }
+
+        // 42. Sudoku Lite (4x4)
+        function loadSudokuLite(body) {
+            const puzzle = [
+                [1, 0, 3, 0],
+                [0, 3, 0, 1],
+                [3, 0, 1, 0],
+                [0, 1, 0, 3]
+            ];
+            let board = puzzle.map(r => [...r]);
+            body.innerHTML = `
+            <div class="game-ui">
+              <div id="sudoGrid" style="display:grid;grid-template-columns:repeat(4,55px);gap:3px;justify-content:center;"></div>
+              <button id="sudoCheck">✅ Check</button>
+              <button id="sudoReset">🔄 Reset</button>
+              <p class="result" id="sudoResult"></p>
+            </div>`;
+            const gridEl = document.getElementById('sudoGrid');
+            const resultEl = document.getElementById('sudoResult');
+
+            function render() {
+                gridEl.innerHTML = '';
+                board.forEach((row, r) => row.forEach((val, c) => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:55px;height:55px;background:#1a1a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;border:2px solid #444;';
+                    if (puzzle[r][c] !== 0) {
+                        cell.textContent = val;
+                        cell.style.fontWeight = '900';
+                        cell.style.color = '#4ecdc4';
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.min = '1';
+                        input.max = '4';
+                        input.value = val || '';
+                        input.style.cssText =
+                            'width:40px;height:40px;text-align:center;background:transparent;border:none;color:#fff;font-size:1.2rem;font-weight:700;';
+                        input.addEventListener('change', () => { const v = parseInt(input.value); if (v >= 1 && v <=
+                                4) board[r][c] = v;
+                            else board[r][c] = 0; });
+                        cell.appendChild(input);
+                    }
+                    gridEl.appendChild(cell);
+                }));
+            }
+            document.getElementById('sudoCheck').addEventListener('click', () => {
+                const solution = [
+                    [1, 4, 3, 2],
+                    [2, 3, 4, 1],
+                    [3, 2, 1, 4],
+                    [4, 1, 2, 3]
+                ];
+                const correct = board.every((row, r) => row.every((v, c) => v === solution[r][c]));
+                resultEl.textContent = correct ? '✅ Correct!' : '❌ Not quite right.';
+                if (correct) spawnConfetti();
+            });
+            document.getElementById('sudoReset').addEventListener('click', () => { board = puzzle.map(r => [...r]);
+                render();
+                resultEl.textContent = ''; });
+            render();
+        }
+
+        // 43. Pair Match (quick)
+        function loadPairMatch(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Match pairs: <span id="pmatchPairs">0</span>/6</p>
+              <div id="pmatchGrid" style="display:grid;grid-template-columns:repeat(4,55px);gap:5px;justify-content:center;"></div>
+            </div>`;
+            const emojis = ['🐶', '🐱', '🐸', '🦊', '🐻', '🐼'];
+            const deck = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+            let flipped = [],
+                matched = new Set(),
+                locked = false;
+            const gridEl = document.getElementById('pmatchGrid');
+            const pairsEl = document.getElementById('pmatchPairs');
+
+            function render() {
+                gridEl.innerHTML = '';
+                deck.forEach((emoji, i) => {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:55px;height:55px;background:#1a1a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;border:2px solid #444;';
+                    cell.textContent = (flipped.includes(i) || matched.has(i)) ? emoji : '?';
+                    cell.addEventListener('click', () => {
+                        if (locked || flipped.includes(i) || matched.has(i) || flipped.length >= 2) return;
+                        flipped.push(i);
+                        render();
+                        if (flipped.length === 2) {
+                            locked = true;
+                            if (deck[flipped[0]] === deck[flipped[1]]) {
+                                matched.add(flipped[0]);
+                                matched.add(flipped[1]);
+                                pairsEl.textContent = matched.size / 2;
+                                flipped = [];
+                                locked = false;
+                                render();
+                                if (matched.size === 12) spawnConfetti(25);
+                            } else setTimeout(() => { flipped = [];
+                                locked = false;
+                                render(); }, 600);
+                        }
+                    });
+                    gridEl.appendChild(cell);
+                });
+            }
+            render();
+        }
+
+        // 44. Jumpy Dino
+        function loadJumpyDino(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Score: <span id="jdScore">0</span></p>
+              <canvas id="jdCanvas" width="320" height="180" style="background:#f0f0f0;border-radius:10px;"></canvas>
+              <p style="font-size:0.7rem;color:#888;">Tap/Click to jump</p>
+            </div>`;
+            const canvas = document.getElementById('jdCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('jdScore');
+            let dinoY = 140,
+                dinoVY = 0,
+                obstacles, score, running, animId, frame;
+            const groundY = 150;
+
+            function init() {
+                dinoY = groundY - 20;
+                dinoVY = 0;
+                obstacles = [{ x: 350, w: 15, h: 25 }];
+                score = 0;
+                scoreEl.textContent = '0';
+                running = true;
+                frame = 0;
+                if (animId) cancelAnimationFrame(animId);
+                loop();
+            }
+
+            function loop() {
+                if (!running) return;
+                frame++;
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, 320, 180);
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(0, groundY, 320, 30);
+                dinoVY += 0.6;
+                dinoY += dinoVY;
+                if (dinoY >= groundY - 20) { dinoY = groundY - 20;
+                    dinoVY = 0; }
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(40, dinoY, 20, 20);
+                ctx.fillStyle = '#e74c3c';
+                obstacles.forEach(o => { ctx.fillRect(o.x, groundY - o.h, o.w, o.h);
+                    o.x -= 3.5; });
+                if (frame % 70 === 0) obstacles.push({ x: 350, w: 12 + Math.random() * 15, h: 18 + Math.random() *
+                        15 });
+                obstacles = obstacles.filter(o => {
+                    if (o.x < -20) { score++;
+                        scoreEl.textContent = score;
+                        spawnConfetti(2); return false; }
+                    if (o.x < 60 && o.x + o.w > 40 && dinoY + 20 > groundY - o.h) { running = false;
+                        ctx.fillStyle = '#000';
+                        ctx.font = '16px sans-serif';
+                        ctx.fillText('Game Over!', 110, 90); return false; }
+                    return true;
+                });
+                if (running) animId = requestAnimationFrame(loop);
+            }
+            function jump() { if (dinoY >= groundY - 20) dinoVY = -9; if (!running) init(); }
+            canvas.addEventListener('click', jump);
+            canvas.addEventListener('touchstart', e => { e.preventDefault();
+                jump(); });
+            init();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 45. Ball Balance
+        function loadBallBalance(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score">Balance: <span id="bbScore">0</span></p>
+              <canvas id="bbCanvas" width="300" height="300" style="background:#1a1a3a;border-radius:10px;"></canvas>
+              <p style="font-size:0.7rem;color:#888;">Tilt your device or use mouse</p>
+            </div>`;
+            const canvas = document.getElementById('bbCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById('bbScore');
+            let ball = { x: 150, y: 150 },
+                tiltX = 0,
+                tiltY = 0,
+                score = 0,
+                running = true,
+                animId;
+
+            function loop() {
+                if (!running) return;
+                ctx.fillStyle = '#1a1a3a';
+                ctx.fillRect(0, 0, 300, 300);
+                ctx.fillStyle = '#2ecc71';
+                ctx.beginPath();
+                ctx.arc(150, 150, 15, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#4ecdc4';
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ball.x += tiltX * 2;
+                ball.y += tiltY * 2;
+                ball.x = Math.max(10, Math.min(290, ball.x));
+                ball.y = Math.max(10, Math.min(290, ball.y));
+                const dist = Math.hypot(ball.x - 150, ball.y - 150);
+                if (dist < 15) score++;
+                scoreEl.textContent = score;
+                animId = requestAnimationFrame(loop);
+            }
+            canvas.addEventListener('mousemove', e => {
+                const rect = canvas.getBoundingClientRect();
+                tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+                tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+            });
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', e => { tiltX = (e.gamma || 0) / 45;
+                    tiltY = (e.beta || 0) / 45;
+                    tiltX = Math.max(-1, Math.min(1, tiltX));
+                    tiltY = Math.max(-1, Math.min(1, tiltY)); });
+            }
+            loop();
+            activeGameCleanup = () => { running = false;
+                cancelAnimationFrame(animId); };
+        }
+
+        // 46. Emoji Riddle
+        function loadEmojiRiddle(body) {
+            const riddles = [
+                { emoji: '🌞🌊', answer: 'sun sea', hint: 'Beach vibes' }, { emoji: '🐝🍃', answer: 'believe',
+                    hint: 'Trust' }, { emoji: '👁️❤️🐶', answer: 'i love dogs', hint: 'Pet lover' }
+            ];
+            let riddle;
+            body.innerHTML = `
+            <div class="game-ui">
+              <p style="font-size:3rem;" id="erEmoji">--</p>
+              <p style="color:#aaa;" id="erHint"></p>
+              <input type="text" id="erInput" placeholder="What does it mean?">
+              <button id="erCheck">✅ Guess</button>
+              <button id="erNew">🔄 New</button>
+              <p class="result" id="erResult"></p>
+            </div>`;
+            const emojiEl = document.getElementById('erEmoji');
+            const hintEl = document.getElementById('erHint');
+            const resultEl = document.getElementById('erResult');
+
+            function newRiddle() { riddle = riddles[Math.floor(Math.random() * riddles.length)];
+                emojiEl.textContent = riddle.emoji;
+                hintEl.textContent = 'Hint: ' + riddle.hint;
+                resultEl.textContent = '';
+                document.getElementById('erInput').value = ''; }
+            document.getElementById('erCheck').addEventListener('click', () => {
+                if (document.getElementById('erInput').value.toLowerCase().trim() === riddle.answer) {
+                    resultEl.textContent = '✅ Correct!';
+                    spawnConfetti();
+                } else resultEl.textContent = '❌ Try again!';
+            });
+            document.getElementById('erNew').addEventListener('click', newRiddle);
+            newRiddle();
+        }
+
+        // 47. Countdown Game
+        function loadCountdownGame(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p class="score" style="font-size:3rem;" id="cdDisplay">10.000</p>
+              <button id="cdStart">⏰ Start Countdown</button>
+              <p class="result" id="cdResult"></p>
+            </div>`;
+            let targetTime, startTime, interval;
+            document.getElementById('cdStart').addEventListener('click', () => {
+                const delay = Math.random() * 3 + 2;
+                document.getElementById('cdDisplay').textContent = 'Wait...';
+                document.getElementById('cdResult').textContent = '';
+                setTimeout(() => {
+                    document.getElementById('cdDisplay').textContent = 'STOP!';
+                    startTime = Date.now();
+                }, delay * 1000);
+            });
+            document.getElementById('cdDisplay').addEventListener('click', () => {
+                if (startTime && document.getElementById('cdDisplay').textContent === 'STOP!') {
+                    const reaction = Date.now() - startTime;
+                    document.getElementById('cdResult').textContent = `⏱️ ${reaction}ms`;
+                    document.getElementById('cdDisplay').textContent = '10.000';
+                    startTime = null;
+                    if (reaction < 200) spawnConfetti(15);
+                }
+            });
+        }
+
+        // 48. Odd One Out
+        function loadOddOneOut(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Find the odd one:</p>
+              <div id="oooGrid" style="display:grid;grid-template-columns:repeat(3,70px);gap:8px;justify-content:center;"></div>
+              <p class="score">Score: <span id="oooScore">0</span></p>
+            </div>`;
+            const gridEl = document.getElementById('oooGrid');
+            const scoreEl = document.getElementById('oooScore');
+            let score = 0;
+
+            function newRound() {
+                gridEl.innerHTML = '';
+                const baseColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                const oddIdx = Math.floor(Math.random() * 9);
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('div');
+                    cell.style.cssText =
+                        'width:70px;height:70px;border-radius:10px;cursor:pointer;border:2px solid #444;';
+                    cell.style.background = i === oddIdx ? shadeColor(baseColor, 30) : baseColor;
+                    cell.addEventListener('click', () => {
+                        if (i === oddIdx) { score++;
+                            scoreEl.textContent = score;
+                            spawnConfetti(5);
+                            newRound(); } else alert('❌ Wrong one!');
+                    });
+                    gridEl.appendChild(cell);
+                }
+            }
+
+            function shadeColor(color, percent) {
+                const num = parseInt(color.replace('#', ''), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+                const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF00) + amt));
+                const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+                return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+            }
+            newRound();
+        }
+
+        // 49. Alphabet Race
+        function loadAlphabetRace(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Type the alphabet A-Z:</p>
+              <p style="font-size:1.5rem;color:#fff;" id="arCurrent">A</p>
+              <input type="text" id="arInput" maxlength="1" placeholder="Type letter">
+              <p class="score">Time: <span id="arTime">0.0</span>s</p>
+              <button id="arStart">▶️ Start</button>
+            </div>`;
+            let current, startTime, running;
+            const currentEl = document.getElementById('arCurrent');
+            const timeEl = document.getElementById('arTime');
+            const inputEl = document.getElementById('arInput');
+            document.getElementById('arStart').addEventListener('click', () => {
+                current = 0;
+                running = true;
+                startTime = Date.now();
+                currentEl.textContent = 'A';
+                timeEl.textContent = '0.0';
+                inputEl.value = '';
+                inputEl.focus();
+            });
+            inputEl.addEventListener('input', () => {
+                if (!running) return;
+                const expected = String.fromCharCode(65 + current);
+                if (inputEl.value.toUpperCase() === expected) {
+                    current++;
+                    if (current >= 26) {
+                        running = false;
+                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                        timeEl.textContent = elapsed;
+                        currentEl.textContent = '🎉 Done!';
+                        spawnConfetti(25);
+                    } else {
+                        currentEl.textContent = String.fromCharCode(65 + current);
+                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                        timeEl.textContent = elapsed;
+                    }
+                    inputEl.value = '';
+                }
+            });
+        }
+
+        // 50. Lucky Number
+        function loadLuckyNumber(body) {
+            body.innerHTML = `
+            <div class="game-ui">
+              <p>Pick a number 1-10:</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;" id="lnButtons"></div>
+              <p class="result" id="lnResult"></p>
+              <button id="lnNew">🔄 New Round</button>
+            </div>`;
+            let luckyNum;
+            const buttonsEl = document.getElementById('lnButtons');
+            const resultEl = document.getElementById('lnResult');
+
+            function init() {
+                luckyNum = Math.floor(Math.random() * 10) + 1;
+                buttonsEl.innerHTML = '';
+                resultEl.textContent = '';
+                for (let i = 1; i <= 10; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = i;
+                    btn.style.cssText =
+                        'width:45px;height:45px;border-radius:50%;border:2px solid #555;background:#1a1a3a;color:#fff;cursor:pointer;font-weight:700;';
+                    btn.addEventListener('click', () => {
+                        if (i === luckyNum) { resultEl.textContent = '🍀 LUCKY! You found it!';
+                            spawnConfetti(30); } else resultEl.textContent =
+                            `❌ Not ${i}. Try again!`;
+                    });
+                    buttonsEl.appendChild(btn);
+                }
+            }
+            document.getElementById('lnNew').addEventListener('click', init);
+            init();
+        }
+
+        // Initialize
+        console.log('🎮 50 Games Arcade Ready! All games work on Mobile & PC.');
+        console.log('Tap any game card to play!');
+    </script>
+</body>
+</html>

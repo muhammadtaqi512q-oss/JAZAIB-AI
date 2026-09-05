@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris - Created by Muhammad Taqi</title>
+    <style>
+        /* ============ RESET & BASE ============ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ============ ANIMATED BEAUTIFUL BACKGROUND ============ */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a2e, #1a0a2e, #0a1a2e, #2e0a1a);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: -2;
+            animation: orbFloat 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .orb:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: #ff0d72;
+            top: -5%;
+            left: -5%;
+            animation-delay: 0s;
+            opacity: 0.35;
+        }
+        .orb:nth-child(2) {
+            width: 350px;
+            height: 350px;
+            background: #0dc2ff;
+            bottom: -8%;
+            right: -5%;
+            animation-delay: -5s;
+            opacity: 0.35;
+        }
+        .orb:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            background: #0dff72;
+            top: 40%;
+            left: 55%;
+            animation-delay: -10s;
+            opacity: 0.25;
+        }
+        .orb:nth-child(4) {
+            width: 280px;
+            height: 280px;
+            background: #f538ff;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: -15s;
+            opacity: 0.25;
+        }
+        .orb:nth-child(5) {
+            width: 200px;
+            height: 200px;
+            background: #ff8e0d;
+            top: 15%;
+            right: 20%;
+            animation-delay: -7s;
+            opacity: 0.3;
+        }
+        .orb:nth-child(6) {
+            width: 220px;
+            height: 220px;
+            background: #3877ff;
+            bottom: 5%;
+            left: 35%;
+            animation-delay: -12s;
+            opacity: 0.3;
+        }
+
+        @keyframes orbFloat {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+            50% {
+                transform: translate(-20px, 30px) scale(0.95);
+            }
+            75% {
+                transform: translate(15px, -20px) scale(1.05);
+            }
+        }
+
+        /* Floating Tetris-like shapes in background */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: shapeFloat 25s linear infinite;
+            font-size: 40px;
+            color: #0dc2ff;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+            color: #ff0d72;
+        }
+        .shape:nth-child(2) {
+            top: 30%;
+            left: 85%;
+            animation-delay: -5s;
+            color: #0dff72;
+            font-size: 55px;
+        }
+        .shape:nth-child(3) {
+            top: 65%;
+            left: 10%;
+            animation-delay: -10s;
+            color: #f538ff;
+            font-size: 45px;
+        }
+        .shape:nth-child(4) {
+            top: 80%;
+            left: 70%;
+            animation-delay: -15s;
+            color: #ffe138;
+            font-size: 50px;
+        }
+        .shape:nth-child(5) {
+            top: 5%;
+            left: 50%;
+            animation-delay: -3s;
+            color: #ff8e0d;
+            font-size: 35px;
+        }
+        .shape:nth-child(6) {
+            top: 50%;
+            left: 30%;
+            animation-delay: -8s;
+            color: #3877ff;
+            font-size: 60px;
+        }
+        .shape:nth-child(7) {
+            top: 20%;
+            left: 70%;
+            animation-delay: -13s;
+            color: #0dc2ff;
+            font-size: 42px;
+        }
+        .shape:nth-child(8) {
+            top: 75%;
+            left: 40%;
+            animation-delay: -18s;
+            color: #ff0d72;
+            font-size: 38px;
+        }
+
+        @keyframes shapeFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.12;
+            }
+            90% {
+                opacity: 0.12;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* ============ HOME SCREEN ============ */
+        #homeScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        #homeScreen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .home-card {
+            background: rgba(20, 20, 40, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow:
+                0 0 60px rgba(13, 194, 255, 0.2),
+                0 0 120px rgba(255, 13, 114, 0.15),
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: cardGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes cardGlow {
+            0%,
+            100% {
+                box-shadow:
+                    0 0 60px rgba(13, 194, 255, 0.2),
+                    0 0 120px rgba(255, 13, 114, 0.15),
+                    0 30px 60px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow:
+                    0 0 80px rgba(13, 194, 255, 0.35),
+                    0 0 160px rgba(255, 13, 114, 0.25),
+                    0 30px 60px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        .tetris-title {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff0d72, #f538ff, #0dc2ff, #0dff72, #ffe138, #ff8e0d);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGradient 5s ease-in-out infinite;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(13, 194, 255, 0.4));
+        }
+
+        @keyframes titleGradient {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .creator-link {
+            color: #0dc2ff;
+            text-decoration: none;
+            font-size: 15px;
+            letter-spacing: 1px;
+            font-weight: 500;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+
+        .creator-link:hover {
+            color: #ff0d72;
+            text-shadow: 0 0 15px rgba(255, 13, 114, 0.5);
+        }
+
+        .name-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 17px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .name-input:focus {
+            border-color: #0dc2ff;
+            box-shadow: 0 0 25px rgba(13, 194, 255, 0.35);
+            background: rgba(0, 0, 0, 0.55);
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            padding: 14px 35px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #0dc2ff, #3877ff);
+            color: white;
+            box-shadow: 0 0 30px rgba(13, 194, 255, 0.4);
+            width: 100%;
+        }
+
+        .btn-play:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(13, 194, 255, 0.6), 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-play:active {
+            transform: translateY(0);
+            box-shadow: 0 0 20px rgba(13, 194, 255, 0.3);
+        }
+
+        .btn-website {
+            background: transparent;
+            color: #0dc2ff;
+            border: 2px solid #0dc2ff;
+            padding: 10px 25px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            box-shadow: 0 0 15px rgba(13, 194, 255, 0.15);
+        }
+
+        .btn-website:hover {
+            background: rgba(13, 194, 255, 0.15);
+            box-shadow: 0 0 25px rgba(13, 194, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .name-saved-badge {
+            display: none;
+            font-size: 12px;
+            color: #0dff72;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .name-saved-badge.show {
+            display: block;
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 10px rgba(13, 255, 114, 0.6);
+            }
+        }
+
+        /* ============ GAME SCREEN ============ */
+        #gameScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            padding: 10px;
+            transition: opacity 0.6s ease;
+        }
+
+        #gameScreen.show {
+            display: flex;
+        }
+
+        #playerInfo {
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: rgba(20, 20, 40, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 8px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #playerNameDisplay {
+            font-size: 16px;
+            color: #0dc2ff;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        #creatorName {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        #scoreBox {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            color: #ffe138;
+            text-shadow: 0 0 15px rgba(255, 225, 56, 0.4);
+        }
+
+        #score {
+            color: #0dff72;
+            font-size: 26px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow:
+                0 0 50px rgba(13, 194, 255, 0.25),
+                0 0 100px rgba(255, 13, 114, 0.15),
+                0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        #tetris {
+            display: block;
+            background: #000;
+        }
+
+        #gameOverOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff0d72;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            z-index: 2;
+            flex-direction: column;
+            display: none;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            text-shadow: 0 0 30px rgba(255, 13, 114, 0.6);
+        }
+
+        #gameOverOverlay.show {
+            display: flex;
+        }
+
+        .btn-restart {
+            margin-top: 18px;
+            font-size: 16px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ff0d72, #f538ff);
+            color: white;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow: 0 0 25px rgba(255, 13, 114, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(255, 13, 114, 0.6);
+        }
+
+        #controls {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ctrl-btn {
+            padding: 10px 16px;
+            background: rgba(30, 30, 50, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 1px;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(60, 60, 90, 0.9);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .ctrl-btn:active {
+            transform: translateY(0);
+            background: rgba(13, 194, 255, 0.3);
+            border-color: #0dc2ff;
+        }
+
+        .ctrl-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 480px) {
+            .tetris-title {
+                font-size: 36px;
+                letter-spacing: 5px;
+            }
+
+            .home-card {
+                padding: 35px 25px;
+                border-radius: 25px;
+            }
+
+            .btn-play {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+
+            .ctrl-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+                min-width: 50px;
+            }
+
+            #scoreBox {
+                font-size: 18px;
+            }
+            #score {
+                font-size: 22px;
+            }
+
+            .canvas-wrapper {
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .home-card {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+            .tetris-title {
+                font-size: 32px;
+                letter-spacing: 4px;
+                margin-bottom: 4px;
+            }
+            .subtitle {
+                font-size: 11px;
+                margin-bottom: 15px;
+            }
+            .name-input {
+                padding: 10px 15px;
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+            .btn-play {
+                padding: 10px 25px;
+                font-size: 15px;
+            }
+            .creator-link {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
+            #playerInfo {
+                padding: 5px 12px;
+                font-size: 12px;
+                gap: 8px;
+            }
+            #controls {
+                margin-top: 6px;
+                gap: 5px;
+            }
+            .ctrl-btn {
+                padding: 6px 10px;
+                font-size: 10px;
+                min-width: 45px;
+                border-radius: 8px;
+            }
+            #scoreBox {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Beautiful Animated Background -->
+    <div class="bg-orbs"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="floating-shapes">
+        <div class="shape">▣</div>
+        <div class="shape">▤</div>
+        <div class="shape">▥</div>
+        <div class="shape">▦</div>
+        <div class="shape">▧</div>
+        <div class="shape">▨</div>
+        <div class="shape">▩</div>
+        <div class="shape">■</div>
+    </div>
+
+    <!-- ============ HOME SCREEN ============ -->
+    <div id="homeScreen">
+        <div class="home-card">
+            <h1 class="tetris-title">TETRIS</h1>
+            <p class="subtitle">CLASSIC BLOCK PUZZLE GAME</p>
+            <a class="creator-link" href="https://taqi.oneapp.dev/" target="_blank" rel="noopener noreferrer">
+                ✦ Created by Muhammad Taqi ✦
+            </a>
+            <div style="margin-top: 10px; margin-bottom: 5px;">
+                <span class="name-label">👤 Enter Your Name to Begin</span>
+            </div>
+            <span class="name-saved-badge" id="nameSavedBadge">✓ Name Saved Permanently</span>
+            <input type="text" id="playerNameInput" class="name-input" placeholder="Type your name here..." maxlength="20" autocomplete="off">
+            <button class="btn btn-play" id="playBtn">▶ Play Game</button>
+            <button class="btn btn-website" id="websiteBtn" onclick="window.open('https://taqi.oneapp.dev/','_blank')">
+                🌐 Visit taqi.oneapp.dev
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ GAME SCREEN ============ -->
+    <div id="gameScreen">
+        <div id="playerInfo">
+            <span id="playerNameDisplay">Player: </span>
+            <span id="creatorName">Creator: MUHAMMAD TAQI</span>
+        </div>
+        <div id="scoreBox">Score: <span id="score">0</span></div>
+
+        <div class="canvas-wrapper">
+            <canvas id="tetris" width="240" height="400"></canvas>
+            <div id="gameOverOverlay">
+                GAME OVER
+                <button class="btn-restart" id="restartBtn">↻ Restart</button>
+            </div>
+        </div>
+
+        <div id="controls">
+            <button class="ctrl-btn" id="leftBtn">◀ Left</button>
+            <button class="ctrl-btn" id="rightBtn">Right ▶</button>
+            <button class="ctrl-btn" id="dropBtn">⬇ Drop</button>
+            <button class="ctrl-btn" id="rotateBtn">⬆ Rotate</button>
+            <button class="ctrl-btn" id="pauseBtn">⏸ Pause</button>
+            <button class="ctrl-btn" id="resumeBtn">▶ Resume</button>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== GAME LOGIC ==================== */
+        const canvas = document.getElementById("tetris");
+        const ctx = canvas.getContext("2d");
+        ctx.scale(20, 20);
+
+        let dropCounter = 0;
+        let dropInterval = 500;
+        let lastTime = 0;
+        let paused = false;
+        let gameOver = false;
+        let moveInterval = null;
+
+        const colors = [
+            null,
+            "#FF0D72", "#0DC2FF", "#0DFF72", "#F538FF",
+            "#FF8E0D", "#FFE138", "#3877FF",
+        ];
+
+        const arena = createMatrix(12, 20);
+        const player = { pos: { x: 0, y: 0 }, matrix: null, score: 0 };
+
+        function arenaSweep() {
+            let rowCount = 1;
+            outer: for (let y = arena.length - 1; y > 0; --y) {
+                for (let x = 0; x < arena[y].length; ++x) {
+                    if (arena[y][x] === 0) continue outer;
+                }
+                const row = arena.splice(y, 1)[0].fill(0);
+                arena.unshift(row);
+                ++y;
+                player.score += rowCount * 10;
+                rowCount *= 2;
+            }
+        }
+
+        function collide(arena, player) {
+            const [m, o] = [player.matrix, player.pos];
+            for (let y = 0; y < m.length; ++y) {
+                for (let x = 0; x < m[y].length; ++x) {
+                    if (m[y][x] !== 0 &&
+                        (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function createMatrix(w, h) {
+            const matrix = [];
+            while (h--) matrix.push(new Array(w).fill(0));
+            return matrix;
+        }
+
+        function createPiece(type) {
+            const pieces = {
+                T: [
+                    [0, 0, 0],
+                    [1, 1, 1],
+                    [0, 1, 0]
+                ],
+                O: [
+                    [2, 2],
+                    [2, 2]
+                ],
+                L: [
+                    [0, 3, 0],
+                    [0, 3, 0],
+                    [0, 3, 3]
+                ],
+                J: [
+                    [0, 4, 0],
+                    [0, 4, 0],
+                    [4, 4, 0]
+                ],
+                I: [
+                    [0, 5, 0, 0],
+                    [0, 5, 0, 0],
+                    [0, 5, 0, 0],
+                    [0, 5, 0, 0]
+                ],
+                S: [
+                    [0, 6, 6],
+                    [6, 6, 0],
+                    [0, 0, 0]
+                ],
+                Z: [
+                    [7, 7, 0],
+                    [0, 7, 7],
+                    [0, 0, 0]
+                ],
+            };
+            return pieces[type];
+        }
+
+        function drawMatrix(matrix, offset) {
+            matrix.forEach((row, y) =>
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        ctx.fillStyle = colors[value];
+                        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+                        // Add subtle glow effect to each block
+                        ctx.shadowColor = colors[value];
+                        ctx.shadowBlur = 4;
+                        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+                        ctx.shadowBlur = 0;
+                    }
+                })
+            );
+        }
+
+        function merge(arena, player) {
+            player.matrix.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) arena[y + player.pos.y][x + player.pos.x] = value;
+                });
+            });
+        }
+
+        function rotate(matrix, dir) {
+            for (let y = 0; y < matrix.length; ++y) {
+                for (let x = 0; x < y; ++x) {
+                    [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+                }
+            }
+            if (dir > 0) matrix.forEach(row => row.reverse());
+            else matrix.reverse();
+        }
+
+        function playerDrop() {
+            if (paused || gameOver) return;
+            player.pos.y++;
+            if (collide(arena, player)) {
+                player.pos.y--;
+                merge(arena, player);
+                playerReset();
+                arenaSweep();
+                updateScore();
+            }
+            dropCounter = 0;
+        }
+
+        function playerMove(dir) {
+            if (paused || gameOver) return;
+            player.pos.x += dir;
+            if (collide(arena, player)) player.pos.x -= dir;
+        }
+
+        function playerReset() {
+            const pieces = "TJLOSZI";
+            player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+            player.pos.y = 0;
+            player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+            if (collide(arena, player)) {
+                gameOver = true;
+                document.getElementById("gameOverOverlay").classList.add("show");
+            }
+        }
+
+        function playerRotate(dir) {
+            if (paused || gameOver) return;
+            const pos = player.pos.x;
+            let offset = 1;
+            rotate(player.matrix, dir);
+            while (collide(arena, player)) {
+                player.pos.x += offset;
+                offset = -(offset + (offset > 0 ? 1 : -1));
+                if (offset > player.matrix[0].length) {
+                    rotate(player.matrix, -dir);
+                    player.pos.x = pos;
+                    return;
+                }
+            }
+        }
+
+        /* ==================== RENDERING LOOP ==================== */
+        function update(time = 0) {
+            if (!paused && !gameOver) {
+                const deltaTime = time - lastTime;
+                lastTime = time;
+                dropCounter += deltaTime;
+                if (dropCounter > dropInterval) playerDrop();
+                draw();
+            }
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw grid lines (subtle)
+            ctx.strokeStyle = "rgba(255,255,255,0.04)";
+            ctx.lineWidth = 0.05;
+            for (let x = 0; x <= 12; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 20);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= 20; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(12, y);
+                ctx.stroke();
+            }
+            drawMatrix(arena, { x: 0, y: 0 });
+            drawMatrix(player.matrix, player.pos);
+        }
+
+        function updateScore() {
+            const playerName = localStorage.getItem("tetrisPlayerName") || "Player";
+            document.getElementById("score").innerText = player.score;
+            document.getElementById("playerNameDisplay").innerText = `Player: ${playerName}`;
+        }
+
+        /* ==================== LOCALSTORAGE NAME ==================== */
+        function loadSavedName() {
+            const saved = localStorage.getItem("tetrisPlayerName");
+            if (saved) {
+                document.getElementById("playerNameInput").value = saved;
+                document.getElementById("nameSavedBadge").classList.add("show");
+            }
+        }
+
+        function saveName() {
+            const name = document.getElementById("playerNameInput").value.trim();
+            if (name) {
+                localStorage.setItem("tetrisPlayerName", name);
+                document.getElementById("nameSavedBadge").classList.add("show");
+                return true;
+            } else {
+                alert("⚠️ Please enter your name to play!");
+                document.getElementById("playerNameInput").focus();
+                return false;
+            }
+        }
+
+        /* ==================== HOME SCREEN → GAME ==================== */
+        document.getElementById("playBtn").addEventListener("click", () => {
+            if (!saveName()) return;
+            const homeScreen = document.getElementById("homeScreen");
+            const gameScreen = document.getElementById("gameScreen");
+            homeScreen.classList.add("hidden");
+            gameScreen.classList.add("show");
+            updateScore();
+            // Reset game state on new game
+            resetGame();
+        });
+
+        document.getElementById("playBtn").addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            if (!saveName()) return;
+            const homeScreen = document.getElementById("homeScreen");
+            const gameScreen = document.getElementById("gameScreen");
+            homeScreen.classList.add("hidden");
+            gameScreen.classList.add("show");
+            updateScore();
+            resetGame();
+        });
+
+        // Also allow Enter key in name input to start game
+        document.getElementById("playerNameInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                document.getElementById("playBtn").click();
+            }
+        });
+
+        function resetGame() {
+            arena.forEach(row => row.fill(0));
+            player.score = 0;
+            player.matrix = null;
+            gameOver = false;
+            paused = false;
+            dropCounter = 0;
+            document.getElementById("gameOverOverlay").classList.remove("show");
+            updateScore();
+            playerReset();
+            lastTime = performance.now();
+        }
+
+        /* ==================== KEYBOARD CONTROLS ==================== */
+        document.addEventListener("keydown", event => {
+            if (event.key === "ArrowLeft") { event.preventDefault();
+                playerMove(-1); }
+            if (event.key === "ArrowRight") { event.preventDefault();
+                playerMove(1); }
+            if (event.key === "ArrowDown") { event.preventDefault();
+                playerDrop(); }
+            if (event.key === "ArrowUp") { event.preventDefault();
+                playerRotate(1); }
+            if (event.key === " ") { event.preventDefault();
+                paused = !paused; }
+        });
+
+        /* ==================== BUTTON & TOUCH CONTROLS ==================== */
+        function startMove(dir) {
+            if (paused || gameOver) return;
+            playerMove(dir);
+            stopMove();
+            moveInterval = setInterval(() => playerMove(dir), 130);
+        }
+
+        function stopMove() {
+            if (moveInterval) {
+                clearInterval(moveInterval);
+                moveInterval = null;
+            }
+        }
+
+        const leftBtn = document.getElementById("leftBtn");
+        leftBtn.addEventListener("mousedown", () => startMove(-1));
+        leftBtn.addEventListener("mouseup", stopMove);
+        leftBtn.addEventListener("mouseleave", stopMove);
+        leftBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            startMove(-1); }, { passive: false });
+        leftBtn.addEventListener("touchend", stopMove);
+        leftBtn.addEventListener("touchcancel", stopMove);
+
+        const rightBtn = document.getElementById("rightBtn");
+        rightBtn.addEventListener("mousedown", () => startMove(1));
+        rightBtn.addEventListener("mouseup", stopMove);
+        rightBtn.addEventListener("mouseleave", stopMove);
+        rightBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            startMove(1); }, { passive: false });
+        rightBtn.addEventListener("touchend", stopMove);
+        rightBtn.addEventListener("touchcancel", stopMove);
+
+        const dropBtn = document.getElementById("dropBtn");
+        dropBtn.addEventListener("mousedown", () => playerDrop());
+        dropBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            playerDrop(); }, { passive: false });
+
+        const rotateBtn = document.getElementById("rotateBtn");
+        rotateBtn.addEventListener("click", () => playerRotate(1));
+        rotateBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            playerRotate(1); }, { passive: false });
+
+        const pauseBtn = document.getElementById("pauseBtn");
+        pauseBtn.addEventListener("click", () => { paused = true; });
+        pauseBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            paused = true; }, { passive: false });
+
+        const resumeBtn = document.getElementById("resumeBtn");
+        resumeBtn.addEventListener("click", () => { paused = false;
+            lastTime = performance.now(); });
+        resumeBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            paused = false;
+            lastTime = performance.now(); }, { passive: false });
+
+        const restartBtn = document.getElementById("restartBtn");
+        restartBtn.addEventListener("click", () => resetGame());
+        restartBtn.addEventListener("touchstart", (e) => { e.preventDefault();
+            resetGame(); }, { passive: false });
+
+        /* ==================== PREVENT CONTEXT MENU ON LONG PRESS ==================== */
+        document.querySelectorAll('.ctrl-btn, .btn').forEach(btn => {
+            btn.addEventListener('contextmenu', (e) => e.preventDefault());
+        });
+
+        /* ==================== INITIALIZE ==================== */
+        loadSavedName();
+        playerReset();
+        update();
+        updateScore();
+
+        // Prefill name and show badge on load if name exists
+        if (localStorage.getItem("tetrisPlayerName")) {
+            document.getElementById("nameSavedBadge").classList.add("show");
+        }
+
+        console.log("🎮 TETRIS - Created by Muhammad Taqi");
+        console.log("🌐 https://taqi.oneapp.dev/");
+    </script>
+</body>
+</html>

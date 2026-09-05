@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROYAL - Gaming Portal by mt</title>
+    <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAJKWwOy-xFlZ8W-S_UyDOCbjo2Ufo8YEUlmCXhaOtCQ&s=10">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #080808;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 40%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px; /* Mobile par spacing dene ke liye */
+            overflow-y: auto;   /* Scrollbar enable karne ke liye */
+        }
+
+        /* Luxury Container Card */
+        .royal-container {
+            background: rgba(18, 18, 18, 0.85);
+            border: 2px solid #d4af37;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.25), inset 0 0 15px rgba(212, 175, 55, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 420px; /* Mobile par screen se bahar nahi jayega */
+            backdrop-filter: blur(10px);
+            margin: auto;
+        }
+
+        /* Branding */
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .creator-tag {
+            font-size: 0.85rem;
+            color: #d4af37;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        /* Modern Buttons Layout */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .royal-btn {
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: #fcf6ba;
+            border: 1px solid #d4af37;
+            padding: 14px 15px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Gold Glow Effect on Hover */
+        .royal-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .royal-btn:hover::before {
+            left: 100%;
+        }
+
+        .royal-btn:hover, .royal-btn:active {
+            background: linear-gradient(135deg, #d4af37, #aa771c);
+            color: #000;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        /* Subtle Footer */
+        .footer-note {
+            margin-top: 25px;
+            font-size: 0.75rem;
+            color: #666;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="royal-container">
+        <h1 class="brand-title">ROYAL</h1>
+        <div class="creator-tag">Created by MUHAMMAD TAQI</div>
+
+        <div class="btn-group">
+            <a href="2.html" class="royal-btn">50+ OFFLINE GAMES</a>
+            <a href="4.html" class="royal-btn">LUDO</a>
+            <a href="3.html" class="royal-btn">HILL CLIMB RACING</a>
+            <a href="5.html" class="royal-btn">TETRIS</a>
+            <a href="6.html" class="royal-btn">STONE PAPER SCISSORS</a>
+            <a href="7.html" class="royal-btn">Stickman Sniper / Sharpshooter</a>
+            <a href="9.html" class="royal-btn">SNAKE GAME</a>
+            <a href="10.html" class="royal-btn">FLAPPY BIRD</a>
+            <a href="8.html" class="royal-btn">NEXURA</a>
+            <a href="8.html" class="royal-btn">OWNER WEB</a>
+        </div>
+
+        <div class="footer-note">EXQUISITE GAMING EXPERIENCE</div>
+    </div>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"e3c1c9af36de41759418005494a48906","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>
