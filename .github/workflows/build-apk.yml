@@ -1,4 +1,4 @@
-name: Build Clean APK with Icon 
+name: Build Clean APK with Icon & Media Permissions
 
 on:
   push:
@@ -24,25 +24,37 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Cordova & Build APK with Icon
+      - name: Install Cordova & Plugins
         run: |
           npm install -g cordova
           
-          # 1. Create Cordova project with Lyramoon 
-          cordova create app com.vibe7.nexura "VIBE PRO"
+          # 1. Create Cordova project
+          cordova create app com.vibe31.nexura "VIBE PRO"
           
-          # 2. Copy Web Source
-          cp index.html app/www/
+          # 2. Copy ALL HTML, CSS, JS and media files to www folder
+          cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
           
           # 3. Add Custom Icon to Config if icon.png exists
           if [ -f "icon.png" ]; then
             cp icon.png app/www/icon.png
             sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
           fi
-          
-          # 4. Add Android Platform & Build
+
           cd app
+          
+          # 4. Add Android Platform
           cordova platform add android
+          
+          # 5. Add Required Cordova Plugins for Voice/Video & Permissions
+          cordova plugin add cordova-plugin-media
+          cordova plugin add cordova-plugin-media-capture
+          cordova plugin add cordova-plugin-camera
+          cordova plugin add cordova-plugin-android-permissions
+          
+          # Inject Camera and Microphone Permissions into AndroidManifest.xml
+          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.RECORD_VIDEO" />' platforms/android/app/src/main/AndroidManifest.xml
+          
+          # 6. Build APK
           cordova build android --debug
 
       - name: Upload APK
