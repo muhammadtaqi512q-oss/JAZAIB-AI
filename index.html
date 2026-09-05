@@ -69,8 +69,6 @@
         .back-btn { font-size: 18px; color: #54656f; cursor: pointer; padding: 5px; }
         .back-btn:hover { color: #00a884; }
         .chat-header-actions { display: flex; gap: 12px; align-items: center; }
-        .call-icon { font-size: 18px; color: #00a884; cursor: pointer; padding: 6px; }
-        .call-icon:hover { color: #008f6f; }
         .chat-action-btn { background: #ea4335; color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .chat-action-btn.secondary { background: #54656f; }
         .chat-action-btn:hover { opacity: 0.9; }
@@ -102,16 +100,6 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,20,26,0.4); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #ffffff; width: 360px; padding: 24px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
         .modal-header { font-size: 18px; font-weight: 600; color: #111b21; margin-bottom: 15px; }
-
-        /* Call Screen Overlay */
-        .call-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #111b21; z-index: 2000; flex-direction: column; justify-content: space-between; padding: 20px; align-items: center; }
-        .call-overlay.active { display: flex; }
-        .video-container { position: relative; width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; }
-        video#remoteVideo { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-        video#localVideo { width: 100px; height: 140px; object-fit: cover; position: absolute; bottom: 10px; right: 10px; border-radius: 8px; border: 2px solid #fff; }
-        .call-controls { display: flex; gap: 20px; margin-bottom: 20px; }
-        .btn-call-action { width: 50px; height: 50px; border-radius: 50%; border: none; color: white; font-size: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .btn-end-call { background: #ea4335; }
     </style>
 </head>
 <body>
@@ -207,12 +195,11 @@
                         <div class="avatar" id="activeAvatar">?</div>
                         <div>
                             <div class="profile-name" id="activeContactName">Friend</div>
+                            <div class="profile-id" id="activeContactId" style="font-size: 11px; color: #667781; margin-bottom: 2px;">ID: -</div>
                             <div class="profile-id" id="activeContactStatus" style="font-size: 11px; color: #667781;">Offline</div>
                         </div>
                     </div>
                     <div class="chat-header-actions">
-                        <i class="fa-solid fa-phone call-icon" title="Voice Call" onclick="startCall(false)"></i>
-                        <i class="fa-solid fa-video call-icon" title="Video Call" onclick="startCall(true)"></i>
                         <button class="chat-action-btn secondary" onclick="deleteChat()" title="Delete all messages">
                             <i class="fa-solid fa-broom"></i>
                         </button>
@@ -237,18 +224,6 @@
                     <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- CALL OVERLAY -->
-    <div class="call-overlay" id="callOverlay">
-        <h3 id="callStatusText" style="color:white; margin-top:20px;">Calling...</h3>
-        <div class="video-container">
-            <video id="remoteVideo" autoplay playsinline></video>
-            <video id="localVideo" autoplay playsinline muted></video>
-        </div>
-        <div class="call-controls">
-            <button class="btn-call-action btn-end-call" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i></button>
         </div>
     </div>
 
@@ -286,10 +261,6 @@
         let activeFriendId = null;
         let pendingOutbox = {};
         let onlineStatus = {};
-
-        // Audio/Video Call state
-        let currentCall = null;
-        let localStream = null;
 
         // Voice Recording State
         let mediaRecorder = null;
@@ -440,26 +411,6 @@
                 flushPendingMessages(incomingId);
             });
 
-            // Handle Incoming Video/Audio Call
-            peer.on('call', (call) => {
-                if (confirm("Incoming Call from " + call.peer.replace('vibe-', '') + ". Accept?")) {
-                    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-                        localStream = stream;
-                        document.getElementById('localVideo').srcObject = stream;
-                        document.getElementById('callOverlay').classList.add('active');
-                        document.getElementById('callStatusText').innerText = "In Call";
-
-                        call.answer(stream);
-                        currentCall = call;
-
-                        call.on('stream', (remoteStream) => {
-                            document.getElementById('remoteVideo').srcObject = remoteStream;
-                        });
-                        call.on('close', () => endCall());
-                    }).catch(err => alert("Error accessing media devices: " + err));
-                }
-            });
-
             peer.on('error', (err) => console.error('PeerJS Error:', err));
         }
 
@@ -531,37 +482,6 @@
                 isRecording = false;
                 micBtn.classList.remove('recording');
             }
-        }
-
-        /* ----- Audio & Video Calling ----- */
-        function startCall(isVideo) {
-            if (!activeFriendId) return;
-            if (!onlineStatus[activeFriendId]) return alert("User is offline. Cannot initiate call.");
-
-            navigator.mediaDevices.getUserMedia({ video: isVideo, audio: true }).then((stream) => {
-                localStream = stream;
-                document.getElementById('localVideo').srcObject = stream;
-                document.getElementById('callOverlay').classList.add('active');
-                document.getElementById('callStatusText').innerText = "Calling " + activeFriendId + "...";
-
-                const call = peer.call('vibe-' + activeFriendId, stream);
-                currentCall = call;
-
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('callStatusText').innerText = "Connected";
-                    document.getElementById('remoteVideo').srcObject = remoteStream;
-                });
-                call.on('close', () => endCall());
-            }).catch(err => alert("Camera/Microphone Permission required: " + err));
-        }
-
-        function endCall() {
-            if (currentCall) currentCall.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
-            document.getElementById('callOverlay').classList.remove('active');
-            document.getElementById('remoteVideo').srcObject = null;
-            document.getElementById('localVideo').srcObject = null;
-            currentCall = null;
         }
 
         /* ----- Pending & Sending Logic ----- */
@@ -657,6 +577,10 @@
                     statusElem.innerText = onlineStatus[activeFriendId] ? 'Online' : 'Offline';
                     statusElem.style.color = onlineStatus[activeFriendId] ? '#00a884' : '#667781';
                 }
+                const idElem = document.getElementById('activeContactId');
+                if (idElem) {
+                    idElem.innerText = 'ID: ' + activeFriendId;
+                }
             }
         }
 
@@ -669,6 +593,7 @@
 
             document.getElementById('activeAvatar').innerText = contact ? contact.name.charAt(0).toUpperCase() : '?';
             document.getElementById('activeContactName').innerText = contact ? contact.name : friendId;
+            document.getElementById('activeContactId').innerText = 'ID: ' + friendId;
 
             document.getElementById('appLayout').classList.add('full-chat');
 
