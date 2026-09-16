@@ -1,64 +1,33 @@
-name: Build Clean APK with Icon & Media Permissions
+name: Build and Deploy Nexura API Shell
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          python-version: '3.x'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      - name: Run Build Script
+        run: python build.py
 
-      - name: Install Cordova & Plugins
+      - name: Commit and Push Built Output
         run: |
-          npm install -g cordova
-          
-          # 1. Create Cordova project
-          cordova create app com.vibe31.nexura "VIBE PRO"
-          
-          # 2. Copy ALL HTML, CSS, JS and media files to www folder
-          cp -r *.html *.png *.jpg *.jpeg *.css *.js app/www/ 2>/dev/null || true
-          
-          # 3. Add Custom Icon to Config if icon.png exists
-          if [ -f "icon.png" ]; then
-            cp icon.png app/www/icon.png
-            sed -i '/<\/widget>/i \    <icon src="www/icon.png" />' app/config.xml
-          fi
-
-          cd app
-          
-          # 4. Add Android Platform
-          cordova platform add android
-          
-          # 5. Add Required Cordova Plugins for Voice/Video & Permissions
-          cordova plugin add cordova-plugin-media
-          cordova plugin add cordova-plugin-media-capture
-          cordova plugin add cordova-plugin-camera
-          cordova plugin add cordova-plugin-android-permissions
-          
-          # Inject Camera and Microphone Permissions into AndroidManifest.xml
-          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.RECORD_VIDEO" />' platforms/android/app/src/main/AndroidManifest.xml
-          
-          # 6. Build APK
-          cordova build android --debug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: VIBE-APP-APK
-          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add index.html sw.js
+          git diff --quiet && git diff --staged --quiet || (git commit -m "auto-build: update index.html and service worker" && git push)
